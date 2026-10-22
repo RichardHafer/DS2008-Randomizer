@@ -1,0 +1,275 @@
+{
+  "format": "dead-space-2008-progression-manifest-v1",
+  "seed": "Ishimura-Test-001",
+  "seed_digest": "24d1436e77cdad4c07fe5c8b5489906d59c64a9eccb0eea2d31a1ef2b97e9c9e",
+  "generator": "generate_ds1_progression_manifest.py",
+  "policy": {
+    "mandatory_plasma_cutter_preserved": true,
+    "starting_weapon_count": 2,
+    "starting_ammo_follows_weapon": true,
+    "schematic_category_preserved": true,
+    "schematic_mapping_key": "schematic_uid",
+    "apply_boundary": "Schematic attributes after deserialize and before Pickup",
+    "persistence_boundary": "Never rewrite restored PlayerStore entries"
+  },
+  "starting_store": {
+    "chapter": "ch01_fit",
+    "archive": "ch01_fit\\ch01_flt.str",
+    "simgroup": "SimGroup/0571_0x4AF199A3.simgroup.bin",
+    "store_list_uid": "49C8A5B2-9E65F457-4B544E45-4B53574F",
+    "replacements": [
+      {
+        "slot": 1,
+        "source_uid": "36C8BC49-5F163CD0-44455257-34303245",
+        "source_name": "Line Gun",
+        "target_uid": "36C8BC49-5F163CD0-44455257-34303245",
+        "target_name": "Line Gun"
+      },
+      {
+        "slot": 2,
+        "source_uid": "36C8BC4F-67BB5F38-44455257-34303245",
+        "source_name": "Pulse Rifle",
+        "target_uid": "36C8BC48-ED477CBA-44455257-34303245",
+        "target_name": "Force Gun"
+      },
+      {
+        "slot": 4,
+        "source_uid": "4BC78C36-9D67757C-544E4543-53574F4B",
+        "source_name": "Pulse Rifle Bullet",
+        "target_uid": "4BC78CEC-DFF02CCF-544E4543-53574F4B",
+        "target_name": "Line Gun Rack",
+        "paired_with_weapon": "Line Gun"
+      },
+      {
+        "slot": 5,
+        "source_uid": "4BC78CEC-DFF02CCF-544E4543-53574F4B",
+        "source_name": "Line Gun Rack",
+        "target_uid": "30C87D90-E7570C3E-4C454D50-4B534544",
+        "target_name": "Force Gun Ammo",
+        "paired_with_weapon": "Force Gun"
+      }
+    ]
+  },
+  "starting_suit": {
+    "randomized": false,
+    "target": {
+      "uid": "38C85887-3B1B7B7D-534F5254-36314E49",
+      "name": "Starting / Level 2 Suit",
+      "class_hash": "0575C2F4"
+    },
+    "credit_balance": {
+      "status": "not_applied",
+      "reason": "retail suit prices/save-wallet mutation not yet verified"
+    }
+  },
+  "schematics": [
+    {
+      "chapter": "ch02_med",
+      "archive": "ch02_med\\ch02_med\\clicnic_z02.str",
+      "simgroup": "SimGroup/0840_0x20F4B0DB.simgroup.bin",
+      "schematic_uid": "33C85D5A-2632A018-45544150-3233374C",
+      "record_offset": "000028D4",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "4BC78CEC-DFF02CCF-544E4543-53574F4B",
+      "source_name": "Line Gun Rack",
+      "target_uid": "30C8692D-6DBBF822-4E484F4A-324E4F53",
+      "target_name": "Flamethrower Fuel"
+    },
+    {
+      "chapter": "ch02_med",
+      "archive": "ch02_med\\ch02_med\\medicalstorage_z01.str",
+      "simgroup": "SimGroup/1344_0xE1C1DC1D.simgroup.bin",
+      "schematic_uid": "33C85D5A-CEEB5D4C-45544150-3233374C",
+      "record_offset": "000077C4",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "4BC78C36-9D67757C-544E4543-53574F4B",
+      "source_name": "Pulse Rifle Bullet",
+      "target_uid": "30C87D90-E7570C3E-4C454D50-4B534544",
+      "target_name": "Force Gun Ammo"
+    },
+    {
+      "chapter": "ch02_med",
+      "archive": "ch02_med\\ch02_med\\securitysta_z01.str",
+      "simgroup": "SimGroup/0847_0xAB02D0B4.simgroup.bin",
+      "schematic_uid": "36C8DBF8-E52E9F7B-45544150-3230314C",
+      "record_offset": "00002D9C",
+      "target_pointer_delta": "08",
+      "kind": "weapon",
+      "source_uid": "36C8BC40-0C67B69A-44455257-34303245",
+      "source_name": "Flamethrower",
+      "target_uid": "36C8BC4F-6F9078E2-44455257-34303245",
+      "target_name": "Ripper"
+    },
+    {
+      "chapter": "ch03_eng",
+      "archive": "ch03_eng\\ch03_eng\\bathroom_z01.str",
+      "simgroup": "SimGroup/0465_0xAA045970.simgroup.bin",
+      "schematic_uid": "35C8D0EB-42A81482-4854414D-37375355",
+      "record_offset": "00001C78",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "30C8692D-6DBBF822-4E484F4A-324E4F53",
+      "source_name": "Flamethrower Fuel",
+      "target_uid": "4BC78C36-9D67757C-544E4543-53574F4B",
+      "target_name": "Pulse Rifle Bullet"
+    },
+    {
+      "chapter": "ch03_eng",
+      "archive": "ch03_eng\\ch03_eng\\fuelstorage_z06.str",
+      "simgroup": "SimGroup/0138_0x13943C80.simgroup.bin",
+      "schematic_uid": "4BC8C204-47702009-544E4543-53574F4B",
+      "record_offset": "000009A8",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "30C8692D-79E101DC-4E484F4A-324E4F53",
+      "source_name": "Ripper Ammo",
+      "target_uid": "4BC78CEC-DFF02CCF-544E4543-53574F4B",
+      "target_name": "Line Gun Rack"
+    },
+    {
+      "chapter": "ch03_eng",
+      "archive": "ch03_eng\\ch03_eng\\huntgrnd_z07.str",
+      "simgroup": "SimGroup/0616_0x66910ECC.simgroup.bin",
+      "schematic_uid": "36C8571F-822308DE-44455257-34303245",
+      "record_offset": "000021C0",
+      "target_pointer_delta": "08",
+      "kind": "weapon",
+      "source_uid": "36C8BC4F-6F9078E2-44455257-34303245",
+      "source_name": "Ripper",
+      "target_uid": "36C8BC40-0C67B69A-44455257-34303245",
+      "target_name": "Flamethrower"
+    },
+    {
+      "chapter": "ch03_eng",
+      "archive": "ch03_eng\\ch03_eng\\trainroom_z01.str",
+      "simgroup": "SimGroup/0414_0xF27707F6.simgroup.bin",
+      "schematic_uid": "4BC8C205-53A919FC-544E4543-53574F4B",
+      "record_offset": "00001DA4",
+      "target_pointer_delta": "08",
+      "kind": "consumable",
+      "source_uid": "4BC78C36-9D5DEC14-544E4543-53574F4B",
+      "source_name": "Medium Health Kit",
+      "target_uid": "4BC806EA-40D9D6F7-544E4543-53574F4B",
+      "target_name": ""
+    },
+    {
+      "chapter": "ch04_brg",
+      "archive": "ch04_brg\\ch04_brg\\captnest_z01.str",
+      "simgroup": "SimGroup/0706_0x28130999.simgroup.bin",
+      "schematic_uid": "5AC8C1FA-F77F3095-52444F52-45554749",
+      "record_offset": "00002144",
+      "target_pointer_delta": "08",
+      "kind": "suit",
+      "source_uid": "36C853BE-3BC7742D-44455257-34303245",
+      "source_name": "Level 3 Suit",
+      "target_uid": "38C854C2-787B299D-54544950-32303253",
+      "target_name": "Level 4 Suit"
+    },
+    {
+      "chapter": "ch04_brg",
+      "archive": "ch04_brg\\ch04_brg\\liftmain_z01.str",
+      "simgroup": "SimGroup/1025_0x73CA1BF9.simgroup.bin",
+      "schematic_uid": "5AC8C1FB-9D6C1D9D-52444F52-45554749",
+      "record_offset": "00007934",
+      "target_pointer_delta": "08",
+      "kind": "weapon",
+      "source_uid": "36C8BC48-ED477CBA-44455257-34303245",
+      "source_name": "Force Gun",
+      "target_uid": "36C8BC4F-67BB5F38-44455257-34303245",
+      "target_name": "Pulse Rifle"
+    },
+    {
+      "chapter": "ch04_brg",
+      "archive": "ch04_brg\\ch04_brg\\liftroomB_z01.str",
+      "simgroup": "SimGroup/0814_0x100248D4.simgroup.bin",
+      "schematic_uid": "5AC8C1FC-112AF761-52444F52-45554749",
+      "record_offset": "00001E00",
+      "target_pointer_delta": "08",
+      "kind": "weapon",
+      "source_uid": "36C8BC3F-F55615C8-44455257-34303245",
+      "source_name": "Contact Beam",
+      "target_uid": "36C8BC3F-F55615C8-44455257-34303245",
+      "target_name": "Contact Beam"
+    },
+    {
+      "chapter": "ch05_med",
+      "archive": "ch05_med\\ch05_med\\chemistry_lab_z01.str",
+      "simgroup": "SimGroup/0916_0x5B02C6FC.simgroup.bin",
+      "schematic_uid": "33C879B4-02871A19-45544150-3336304C",
+      "record_offset": "000028EC",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "30C87D90-E7570C3E-4C454D50-4B534544",
+      "source_name": "Force Gun Ammo",
+      "target_uid": "4BC78C36-9D651322-544E4543-53574F4B",
+      "target_name": "Plasma Cutter Battery"
+    },
+    {
+      "chapter": "ch06_hyd",
+      "archive": "ch06_hyd\\ch06_hyd\\saplingroom_z01.str",
+      "simgroup": "SimGroup/1104_0x37E6DE53.simgroup.bin",
+      "schematic_uid": "45C8596B-EE928F4B-41455753-474E4952",
+      "record_offset": "00002EAC",
+      "target_pointer_delta": "08",
+      "kind": "ammo",
+      "source_uid": "30C87377-E3BC55EA-4C454D50-4B534544",
+      "source_name": "Contact Beam Ammo",
+      "target_uid": "30C8692D-79E101DC-4E484F4A-324E4F53",
+      "target_name": "Ripper Ammo"
+    },
+    {
+      "chapter": "ch07_min",
+      "archive": "ch07_min\\ch07_min\\mainannex_z02.str",
+      "simgroup": "SimGroup/0576_0xCDA394B9.simgroup.bin",
+      "schematic_uid": "30C8E1FF-A3438544-54544950-32303153",
+      "record_offset": "000031F0",
+      "target_pointer_delta": "08",
+      "kind": "suit",
+      "source_uid": "38C854C2-787B299D-54544950-32303253",
+      "source_name": "Level 4 Suit",
+      "target_uid": "30C87D7E-9E6B76CD-4E484F4A-324E4F53",
+      "target_name": "Level 5 Suit"
+    },
+    {
+      "chapter": "ch08_brg",
+      "archive": "ch08_brg\\ch08_brg\\radioroom_z01.str",
+      "simgroup": "SimGroup/0718_0x5EA4B7D3.simgroup.bin",
+      "schematic_uid": "5AC8C1F7-1BC78AE1-52444F52-45554749",
+      "record_offset": "000013A4",
+      "target_pointer_delta": "08",
+      "kind": "consumable",
+      "source_uid": "4BC7F007-713FFAEE-544E4543-53574F4B",
+      "source_name": "Double Air Cannister",
+      "target_uid": "4BC7F007-713FFAEE-544E4543-53574F4B",
+      "target_name": "Double Air Cannister"
+    },
+    {
+      "chapter": "ch09_mil",
+      "archive": "ch09_mil\\ch09_mil\\medical_z03.str",
+      "simgroup": "SimGroup/0661_0x5921975E.simgroup.bin",
+      "schematic_uid": "35C8E7C9-A235E54C-44455257-38343145",
+      "record_offset": "000015B0",
+      "target_pointer_delta": "08",
+      "kind": "consumable",
+      "source_uid": "4BC78C36-9D604E6E-544E4543-53574F4B",
+      "source_name": "Large Health Kit",
+      "target_uid": "35C7C97F-CCF3A350-4854414D-37375355",
+      "target_name": "Air Cannister"
+    },
+    {
+      "chapter": "ch10_crw",
+      "archive": "ch10_crw\\ch10_crw\\rec_lockerroom_z01.str",
+      "simgroup": "SimGroup/0738_0x6CDEEA89.simgroup.bin",
+      "schematic_uid": "30C8C202-CCA5A416-4E484F4A-324E4F53",
+      "record_offset": "00002BFC",
+      "target_pointer_delta": "08",
+      "kind": "suit",
+      "source_uid": "30C87D7E-9E6B76CD-4E484F4A-324E4F53",
+      "source_name": "Level 5 Suit",
+      "target_uid": "36C853BE-3BC7742D-44455257-34303245",
+      "target_name": "Level 3 Suit"
+    }
+  ]
+}
