@@ -1,0 +1,25 @@
+# Build output and packages
+/build/
+/obj/
+/dist/
+*.asi
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+__pycache__/
+
+# Game-derived data and the third-party loader binary ship with the release, not with the code
+/assets_minimal/
+/assets/*.str
+/release/winmm.dll
+
+# Runtime leftovers
+*.log
+*.dmp
+*.bak*
+*.tmp
+
+# Console DLC add-on: released separately
+/src/dlc/

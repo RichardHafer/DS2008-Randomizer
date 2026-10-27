@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ini text eol=crlf
+*.txt text eol=crlf
+*.exe binary
+*.dll binary
+*.png binary
+*.ico binary
+*.str binary
+*.toc binary
