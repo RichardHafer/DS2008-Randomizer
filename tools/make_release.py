@@ -32,7 +32,8 @@ FILES = [
     (RELEASE / "winmm.dll", "winmm.dll", "Ultimate ASI Loader 9.7.2: loads plugins/*.asi"),
     (RELEASE / "UltimateASILoader_LICENSE.txt", "UltimateASILoader_LICENSE.txt", "its MIT licence"),
 ]
-ASSET_GLOBS = [(PATCH / "assets_minimal", "*.str", "ds1_randomizer_assets/", "enemy pool sidecar archives")]
+ASSET_GLOBS = [(PATCH / "assets_pool", "*.str", "ds1_randomizer_assets/", "enemy pool sidecar archives"),
+               (PATCH / "assets_pool" / "pool", "*.str", "ds1_randomizer_assets/pool/", "the pool's own archive copies")]
 # Archives shipped outside the pool build: the second Exploder look and its voice bank.
 ASSET_FILES = [
     (PATCH / "assets" / "sup_expl.str", "ds1_randomizer_assets/sup_expl.str", "Enhanced Exploder archive"),

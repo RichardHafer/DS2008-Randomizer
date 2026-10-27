@@ -12,6 +12,7 @@ __pycache__/
 
 # Game-derived data and the third-party loader binary ship with the release, not with the code
 /assets_minimal/
+/assets_pool/
 /assets/*.str
 /release/winmm.dll
 
