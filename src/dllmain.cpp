@@ -1598,10 +1598,30 @@ namespace
         host.objectFor = &ExtensionObjectFor;
         host.storeRequirement = &ExtensionStoreRequirement;
         host.firstWeaponItem = &ExtensionFirstWeaponItem;
+        // The ASI loader loads plugin after plugin while this thread already runs, so an installed extension can
+        // still be on its way (a first start without the DLC crashed on a save wearing a DLC suit).
         HMODULE module = GetModuleHandleA("DeadSpace2008Randomizer_ConsoleDLC.asi");
+        bool installed = module != nullptr;
+        for (const char* folder : {"", "plugins\\", "scripts\\"})
+        {
+            char path[MAX_PATH];
+            std::snprintf(path, sizeof(path), "%s%sDeadSpace2008Randomizer_ConsoleDLC.asi", gGameRoot, folder);
+            installed = installed || GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
+        }
+        if (!module && installed)
+        {
+            const ULONGLONG start = GetTickCount64();
+            while (!module && GetTickCount64() - start < 10000)
+            {
+                Sleep(10);
+                module = GetModuleHandleA("DeadSpace2008Randomizer_ConsoleDLC.asi");
+            }
+            Log("extension: DeadSpace2008Randomizer_ConsoleDLC.asi %s after %llu ms", module ? "loaded" : "NOT loaded",
+                static_cast<unsigned long long>(GetTickCount64() - start));
+        }
         if (!module)
         {
-            Log("extension: none (no DeadSpace2008Randomizer_ConsoleDLC.asi loaded)");
+            Log("extension: none (no DeadSpace2008Randomizer_ConsoleDLC.asi %s)", installed ? "loaded" : "installed");
             return;
         }
         const auto get = reinterpret_cast<ds2008::GetExtensionFn>(GetProcAddress(module, ds2008::kExtensionExport));

@@ -1,4 +1,4 @@
-Dead Space 2008 Randomizer 1.0.0
+Dead Space 2008 Randomizer 1.0.1
 Dead Space (2008), Steam version
 
 WHAT IT DOES
@@ -25,7 +25,7 @@ INSTALL
      DeadSpace1Progression*.tsv           (schematic and store lists)
 3. If the folder already has a winmm.dll from another mod, keep that one; it is
    most likely the same loader.
-4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.0" next to the
+4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.1" next to the
    game version when the plugin is running.
 
 SETTINGS
@@ -34,6 +34,9 @@ Run DeadSpace2008RandomizerConfig.exe from the game folder. It opens the
 DeadSpace2008Randomizer.ini next to it on its own. Pick a seed and the modules
 you want, save, then start the game and begin a NEW game. Changing settings in
 the middle of a playthrough mixes two runs.
+
+In the main menu, F9 opens an overlay to start from any checkpoint, change the
+randomizer settings or use cheats.
 
 Defaults: enemy randomizer, loot, crates, loose items, logs, schematics, first weapon,
 chapter order and oxygen on; the rest off.

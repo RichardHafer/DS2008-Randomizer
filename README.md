@@ -82,7 +82,7 @@ Dead Space/
 If the folder already has a `winmm.dll` from another mod, keep that one; it is
 most likely the same loader.
 
-Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.0" next
+Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.1" next
 to the game version when the plugin is running.
 
 Settings live in `DeadSpace2008Randomizer.ini`, and
@@ -93,6 +93,10 @@ middle of a playthrough mixes two runs.
 Loading screens are a little longer than usual. The plugin keeps every enemy
 template resident so any enemy can appear anywhere, and it holds the loading
 screen until that pool is ready. That is on purpose.
+
+The console DLC suits and weapons are a separate add-on:
+[DS2008-ConsoleDLC](https://github.com/RichardHafer/DS2008-ConsoleDLC). It needs
+randomizer 1.0.1 or later when both are installed.
 
 Works next to DeadSpaceFixes. To uninstall, delete
 `plugins\DeadSpace2008Randomizer.asi` (and `winmm.dll` if no other mod uses
@@ -157,7 +161,6 @@ the grid and the save data stay as authored.
 
 - More enemy variants
 - Vacuum rooms picked by the seed
-- A console DLC add-on (suits and weapons) as a separate plugin
 
 ## Building
 
@@ -166,7 +169,7 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`tools\make_release.py --version 1.0.0` builds the release zip. It needs the
+`tools\make_release.py --version 1.0.1` builds the release zip. It needs the
 enemy pool archives and the Ultimate ASI Loader's `winmm.dll`, which are not
 part of the repository: the pool is game-derived and ships with the release,
 not with the code.
