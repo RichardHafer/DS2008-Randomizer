@@ -36,7 +36,7 @@ namespace DS2008RandomizerConfig
             "EnemyRandomizerHeavyFamilies=1", "EnemyRandomizerIgnoreVentSurface=1", "SpawnsPerTrigger=1",
             "EnemyType_Zombie=1", "EnemyType_Lurker=1", "EnemyType_Leaper=1", "EnemyType_Exploder=1", "EnemyType_Infector=1",
             "EnemyType_SwarmEnemy=1", "EnemyType_Brute=1", "EnemyType_Pregnant=1", "EnemyType_DividerCore=1",
-            "PlayingDeadCorpses=0", "PlayingDeadPercent=20", "LootRandomizer=0", "LootWeightRandomizer=0", "LootScarcity=0",
+            "LootRandomizer=0", "LootWeightRandomizer=0", "LootScarcity=0",
             "LootAutoScale=0", "LootAmmoPercent=100", "LootCreditsPercent=100", "LooseItemRandomizer=0", "CrateRandomizer=0",
             "FirstWeaponRandomizer=0", "ProgressionRandomizer=0", "ProgressionSeeded=0", "ProgressionStoreGate=0",
             "ProgressionStartingWeapons=0", "StartingSuitRandomizer=0", "StartingSuitCreditShare=50", "ConsoleDlc=1",
@@ -613,8 +613,6 @@ namespace DS2008RandomizerConfig
                 list.Add("Zero-G normal / enhanced needs the enemy randomizer and the global enemy pool.");
             if (On(v, "LootAutoScale") && (Get(v, "LootAmmoPercent") != "100" || Get(v, "LootCreditsPercent") != "100"))
                 list.Add("Loot scales with More enemies, so the manual Ammo and Credit amounts are not used.");
-            if (!On(v, "PlayingDeadCorpses") && Get(v, "PlayingDeadPercent") != Get(saved, "PlayingDeadPercent"))
-                list.Add("Playing-dead share only matters with Playing-dead enemies on.");
             if (!On(v, "StartingSuitRandomizer") && Get(v, "StartingSuitCreditShare") != Get(saved, "StartingSuitCreditShare"))
                 list.Add("Suit debt share only matters with Starting suit on.");
             int path = dlc ? SuitPaths.For(v) : -1;

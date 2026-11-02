@@ -1479,7 +1479,7 @@ namespace
     // pinned banks crowd out level sounds (sirens and voices went silent).
     bool gEnemyRandomizerAudioPreload = true;
     // EnemyRandomizerDirectSpawns: directly placed spawners take part too; their
-    // vent donors are placed through the spawning decoder (corpse_randomizer.inc).
+    // vent donors are placed through the spawning decoder (spawning_decoder.inc).
     bool gEnemyRandomizerDirectSpawns = true;
     bool gEnemyRandomizerHeavyFamilies = true;
     bool gDirectPlacementWanted = false;
@@ -1650,7 +1650,7 @@ namespace
 #include "limb_randomizer.inc"
 #include "log_randomizer.inc"
 #include "crate_randomizer.inc"
-#include "corpse_randomizer.inc"
+#include "spawning_decoder.inc"
 #include "exploder_randomizer.inc"
 #include "super_exploder_audio.inc"
 #include "death_message_transplant.inc"
@@ -2044,7 +2044,6 @@ namespace
     // decides how an enemy arrives. The flags word only differs as a
     // consequence.
     constexpr unsigned kSpawnModeVent = 1;
-    constexpr unsigned kSpawnModePlayingDead = 3;
     const GlobalEnemyTarget kGlobalEnemyTargets[] = {
 #include "global_enemy_target_manifest.inc"
     };
@@ -4777,9 +4776,7 @@ namespace
                             const char* word = fields[7];
                             while (*word == ' ')
                                 ++word;
-                            if (_stricmp(word, "dead") == 0)
-                                rule.wantMode = kSpawnModePlayingDead;
-                            else if (_stricmp(word, "vent") == 0)
+                            if (_stricmp(word, "vent") == 0)
                                 rule.wantMode = kSpawnModeVent;
                             else if (_stricmp(word, "direct") == 0)
                                 rule.wantMode = 7;
@@ -5153,7 +5150,6 @@ namespace
         LoadLogSettings();
         LoadLooseItemSettings();
         LoadVacuumRoomSettings();   // after the seed
-        LoadCorpseSettings();
         LoadExploderSettings();
         LoadVariantTunings();
         LoadSlotListSettings();
@@ -9689,7 +9685,7 @@ namespace
                 InstallLimbHooks();
                 InstallCrateHooks();
                 InstallLogHooks();
-                InstallCorpseHooks();
+                InstallSpawningDecoderHook();
                 InstallExploderHooks();
                 InstallSuperExploderAudioHook();
                 InstallDeathMessageTransplant();

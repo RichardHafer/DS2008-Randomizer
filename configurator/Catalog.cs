@@ -224,10 +224,6 @@ namespace DS2008RandomizerConfig
                 "Total Pregnants at an eligible trigger; each can release Swarmers.", "1", "1", 1, 16),
             Number("More enemies", "EnemyType_DividerCore", "Dividers per trigger",
                 "Total Divider cores at an eligible trigger. One is original.", "1", "1", 1, 16),
-            Toggle("More enemies", "PlayingDeadCorpses", "Playing-dead enemies",
-                "Some eligible enemies wait as bodies instead of emerging from vents.", "0", "0"),
-            Number("More enemies", "PlayingDeadPercent", "Playing-dead share (%)",
-                "Chance for an eligible encounter when playing-dead enemies are enabled.", "20", "20", 0, 100),
 
             Toggle("Loot & items", "LootRandomizer", "Shuffle drops",
                 "Exchange the items in enemy and crate drop tables.", "0", "1"),

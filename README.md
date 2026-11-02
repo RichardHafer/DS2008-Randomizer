@@ -48,7 +48,6 @@ ASI Loader and everything happens in memory while you play.
 | `StartingSuitRandomizer` | Start in a random suit and pay for it from future credit income (`StartingSuitCreditShare`). |
 | `UpgradeBenchRandomizer` | Which upgrade nodes each bench offers (experimental). |
 | `LimbWeakSpotRandomizer`, `LimbProfilePool`, `LimbSeverCostRandomizer` | Move where an enemy's weak limb is and what cutting each limb is worth. |
-| `PlayingDeadCorpses` | Some corpses are necromorphs playing dead. |
 | `GodMode`, `DamageMultiplier` | Practice helpers, also as toggle keys. |
 
 Every patch site is checked against the Steam bytes before it is placed, and
