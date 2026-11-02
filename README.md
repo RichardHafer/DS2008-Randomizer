@@ -181,6 +181,8 @@ so an unsupported build fails safely and reports what it could not find.
 
 ## Credits
 
+Created by [Richard Hafer](https://github.com/RichardHafer).
+
 - [safetyhook](https://github.com/cursey/safetyhook) and [Zydis](https://github.com/zyantific/zydis) for hooking
 - [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) by ThirteenAG for loading the plugin
 - Everyone who played test runs and sent logs

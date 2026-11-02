@@ -9,7 +9,13 @@ using DS2CoopConfig;
 using ConfigSwitch = DS2CoopConfig.Switch;
 
 [assembly: AssemblyTitle("Dead Space 2008 Randomizer Configurator")]
+[assembly: AssemblyDescription("Settings for the Dead Space 2008 Randomizer")]
+[assembly: AssemblyProduct("Dead Space 2008 Randomizer")]
+[assembly: AssemblyCompany("Richard Hafer")]
+[assembly: AssemblyCopyright("Copyright © 2026 Richard Hafer")]
 [assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
+[assembly: AssemblyInformationalVersion("1.0.2")]
 
 namespace DS2008RandomizerConfig
 {
@@ -35,9 +41,14 @@ namespace DS2008RandomizerConfig
         private string filePath;
         private bool loading;
 
+        internal const string AppVersion = "1.0.2";
+        internal const string Author = "Richard Hafer";
+        internal const string RepoUrl = "https://github.com/RichardHafer/DS2008-Randomizer";
+        internal const string DlcRepoUrl = "https://github.com/RichardHafer/DS2008-ConsoleDLC";
+
         internal ConfigForm(string initialPath)
         {
-            Text = "Dead Space 2008 Randomizer Configurator v1.0.2";
+            Text = "Dead Space 2008 Randomizer Configurator v" + AppVersion;
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             ShowIcon = true;
             FormBorderStyle = FormBorderStyle.Sizable;
@@ -124,8 +135,9 @@ namespace DS2008RandomizerConfig
             var divider = new Panel { BackColor = Theme.Border };
             divider.SetBounds(411, 23, 1, 62);
             banner.Controls.Add(divider);
-            var kicker = Label("DEAD SPACE 2008", Theme.Small, Theme.Accent);
-            kicker.SetBounds(435, 16, 270, 20);
+            var kicker = Label("DEAD SPACE 2008  ·  V" + AppVersion + "  ·  BY " + Author.ToUpperInvariant(),
+                Theme.Small, Theme.Accent);
+            kicker.SetBounds(435, 16, 360, 20);
             banner.Controls.Add(kicker);
             var title = Label("Randomizer settings", new Font("Segoe UI Semibold", 14f), Theme.Text);
             title.SetBounds(435, 34, 400, 31);
@@ -150,14 +162,21 @@ namespace DS2008RandomizerConfig
             copy.SetBounds(0, 34, 124, 31);
             copy.Click += delegate { CopyCode(); };
             banner.Controls.Add(copy);
+            var about = Button("About", false);
+            about.SetBounds(0, 34, 72, 31);
+            about.Click += delegate { ShowAbout(); };
+            banner.Controls.Add(about);
+            tips.SetToolTip(about, "Version, credits and links (F1).");
             tips.SetToolTip(copy, "One code with the seed and every changed setting, to share a run with friends.");
             tips.SetToolTip(paste, "Take over a run from a seed code. Nothing is saved until you press Save.");
             banner.Resize += delegate {
                 choose.Left = banner.Width - 141;
                 paste.Left = choose.Left - 136;
                 copy.Left = paste.Left - 132;
-                title.Width = Math.Max(180, copy.Left - title.Left - 20);
-                pathBox.Width = Math.Max(160, copy.Left - pathBox.Left - 18);
+                about.Left = copy.Left - 80;
+                kicker.Width = Math.Max(180, about.Left - kicker.Left - 20);
+                title.Width = Math.Max(180, about.Left - title.Left - 20);
+                pathBox.Width = Math.Max(160, about.Left - pathBox.Left - 18);
             };
             banner.Paint += delegate(object sender, PaintEventArgs e) {
                 using (var background = new System.Drawing.Drawing2D.LinearGradientBrush(
@@ -681,6 +700,69 @@ namespace DS2008RandomizerConfig
             }
             ShowPage();
             SetStatus("Seed code taken over (seed " + values["EnemyRandomizerSeed"] + "). Press Save to keep it.");
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                ShowAbout();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // Version, author, links, credits and the licence.
+        private void ShowAbout()
+        {
+            using (var dialog = new Form { Text = "About", Size = new Size(560, 430),
+                StartPosition = FormStartPosition.CenterParent, BackColor = Theme.Back, ForeColor = Theme.Text,
+                Font = Theme.Body, ShowIcon = false, MinimizeBox = false, MaximizeBox = false,
+                FormBorderStyle = FormBorderStyle.FixedDialog })
+            {
+                var stripe = new Panel { Dock = DockStyle.Top, Height = 3, BackColor = Theme.Accent };
+                dialog.Controls.Add(stripe);
+                int y = 20;
+                Action<string, Font, Color, int> line = delegate(string text, Font font, Color color, int height) {
+                    var label = Label(text, font, color);
+                    label.SetBounds(24, y, 500, height);
+                    dialog.Controls.Add(label);
+                    y += height;
+                };
+                line("DEAD SPACE 2008", Theme.Small, Theme.Accent, 20);
+                line("Randomizer", new Font("Segoe UI Semibold", 16f), Theme.Text, 34);
+                line("Version " + AppVersion + " (configurator and plugin)", Theme.Body, Theme.Secondary, 24);
+                y += 6;
+                line("Created by " + Author, new Font("Segoe UI Semibold", 11f), Theme.Text, 26);
+                y += 6;
+                Action<string, string> link = delegate(string text, string url) {
+                    var label = new LinkLabel { Text = text, Font = Theme.Body, BackColor = Color.Transparent,
+                        LinkColor = Theme.Changed, ActiveLinkColor = Theme.Accent, VisitedLinkColor = Theme.Changed,
+                        UseMnemonic = false };
+                    label.SetBounds(24, y, 500, 22);
+                    label.LinkClicked += delegate { Process.Start(url); };
+                    dialog.Controls.Add(label);
+                    y += 24;
+                };
+                link(RepoUrl.Replace("https://", ""), RepoUrl);
+                link(DlcRepoUrl.Replace("https://", "") + " (console DLC add-on)", DlcRepoUrl);
+                y += 10;
+                line("Thanks to", Theme.Small, Theme.Muted, 20);
+                line("safetyhook and Zydis for hooking", Theme.Body, Theme.Secondary, 22);
+                line("Ultimate ASI Loader by ThirteenAG for loading the plugin", Theme.Body, Theme.Secondary, 22);
+                y += 10;
+                line("MIT licence. Copyright © 2026 " + Author + ".", Theme.Small, Theme.Muted, 20);
+                line("Not affiliated with EA or Visceral Games. Dead Space is a trademark of EA.", Theme.Small,
+                    Theme.Muted, 20);
+                var close = Button("Close", true);
+                close.SetBounds(440, y + 14, 86, 32);
+                close.DialogResult = DialogResult.OK;
+                dialog.Controls.Add(close);
+                dialog.AcceptButton = close;
+                dialog.CancelButton = close;
+                dialog.ClientSize = new Size(dialog.ClientSize.Width, y + 62);
+                dialog.ShowDialog(this);
+            }
         }
 
         // A small input box; the clipboard's code is filled in when there is one.
