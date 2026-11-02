@@ -2825,9 +2825,10 @@ namespace
         const uint32_t badVent = kSpawnContextVentSideWallNormal | kSpawnContextVentCeilingNormal |
                                  kSpawnContextVentAngledNormal | kSpawnContextVentUnknownSurface |
                                  kSpawnContextCeiling | kSpawnContextWallOrClimb;
-        const bool vent = (source.context & kSpawnContextVent) != 0;
+        // orientation bits come without the legacy vent bit, so either marks a vent
+        const bool vent = (source.context & (kSpawnContextVent | kSpawnContextAnyVent)) != 0;
         const bool floor = (source.context & (kSpawnContextVentFloorNormal | kSpawnContextFloorVent)) != 0;
-        if (!vent || (floor && !(source.context & badVent)))
+        if (!(source.context & badVent) && (!vent || floor))
             return false;
         if (InterlockedIncrement(&gLurkerVentRejects) <= 8)
             Log("enemy randomizer: no Lurker for %s/%s, its vent is not on the floor", source.actorClass,
