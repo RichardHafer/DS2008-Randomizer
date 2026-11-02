@@ -285,6 +285,11 @@ namespace DS2008RandomizerConfig
                 "Put the converted console DLC weapons and suits into every store for 0 credits.", "1", "1"),
             Toggle("Console DLC", "ConsoleDlcMaterials", "Console DLC suit materials",
                 "DLC suits use the console material values (shine, lighting) instead of the PC ones.", "0", "0"),
+            Toggle("Console DLC", "RigColours", "RIG colours",
+                "The RIG health and stasis bars of the DLC suits in the colour of their style (Scorpion gold, Obsidian " +
+                "blue, Unitology blue violet, Elite green, Astronaut white, Military dark blue). Off keeps the teal. " +
+                "The first start after a change writes recoloured suit copies; RigColour_<Style> in the INI sets " +
+                "R,G,B or off per style.", "0", "1", "Experimental."),
             Number("Console DLC", "SuitSlots", "Suit table size",
                 "How many suits the game can hold. 30 is retail; the custom DLC suits need 64.", "64", "64", 30, 100),
             Toggle("Console DLC", "SuitPaths", "Suit paths",
