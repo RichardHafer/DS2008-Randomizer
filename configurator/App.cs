@@ -9,7 +9,7 @@ using DS2CoopConfig;
 using ConfigSwitch = DS2CoopConfig.Switch;
 
 [assembly: AssemblyTitle("Dead Space 2008 Randomizer Configurator")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.2.0")]
 
 namespace DS2008RandomizerConfig
 {
@@ -37,7 +37,7 @@ namespace DS2008RandomizerConfig
 
         internal ConfigForm(string initialPath)
         {
-            Text = "Dead Space 2008 Randomizer Configurator v1.0.0";
+            Text = "Dead Space 2008 Randomizer Configurator v1.0.2";
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             ShowIcon = true;
             FormBorderStyle = FormBorderStyle.Sizable;

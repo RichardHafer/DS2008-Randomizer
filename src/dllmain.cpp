@@ -3827,6 +3827,7 @@ namespace
     volatile LONG gHeldClearRequest = 0;   // a world change; set from any thread, served on the game thread
 #include "watchdog.inc"
 #include "scripted_cast.inc"
+#include "scene_gates.inc"
 #include "pregnant_swarm.inc"
 #include "divider_parts.inc"
 
@@ -4237,6 +4238,11 @@ namespace
                     NoteScriptedKept(&gScriptedKeptFixed, where, "its scene needs the authored actor itself");
                     return false;
                 }
+                if (SceneClipKeepsAuthored(sourceEntity))
+                {
+                    InterlockedIncrement(&gScriptedKeptFixed);
+                    return false;
+                }
                 if (!PrepareSequenceRecast(original, recast, where))
                     return false;
             }
@@ -4422,12 +4428,17 @@ namespace
                     RememberPick(sourceEntity, original, static_cast<int>(selectedIndex));
                     static LONG pickLines = 0;
                     if (InterlockedIncrement(&pickLines) <= 300 || gEnemyRandomizerDiagnostics)
-                        Log("randomizer pick: %s/%s -> %s/%s, %s, at %s (%u candidates, chapter %u)%s%s",
+                        Log("randomizer pick: %s/%s -> %s/%s, %s, at %s (%u candidates, run position %u, chapter %u, "
+                            "%s%s, donor %08X-%08X)%s%s",
                             source ? source->actorClass : gActorNames[sourceSlot],
                             source ? source->variant : "?", selected.actorClass, selected.variant,
                             placeChoice[picked] ? "vent donor placed directly" :
                                 selected.ventMode ? "out of the vent" : "placed directly",
                             SpawnerName(sourceEntity), count, chapter,
+                            source ? (source->context >> kSpawnContextChapterShift) & 0xFu : 0u,
+                            source ? SpawnContextName(source->context) : "no context",
+                            source && (source->context & kSpawnContextNoHunter) ? ", kills counted or own Hunter" : "",
+                            selected.target.value[0], selected.target.value[1],
                             scripted ? ", its sequences follow" : "", how);
                     return true;
                 };
@@ -4867,6 +4878,7 @@ namespace
         LoadCrashSettings();
         LoadLootAmountSettings();
         LoadWatchdogSettings();
+        LoadSceneGateSettings();
         gExtraSpawns = static_cast<unsigned>(
             GetPrivateProfileIntA("DeadSpace2008Randomizer", "SpawnsPerTrigger",
                                   GetPrivateProfileIntA("DeadSpace2008Randomizer",
@@ -6919,6 +6931,7 @@ namespace
         LogDividerPartTotals();
         LogLootAmountTotals();
         LogWatchdogTotals();
+        LogSceneGateTotals();
         LogHeldSpawnTotals();
         LogExtensionStoreTotals();
         static long lastReplaced = -1, lastFallbacks = -1;
@@ -7617,6 +7630,7 @@ namespace
     }
 
 #include "world_editor.inc"
+#include "message_probe.inc"
 #include "god_mode.inc"
 
     // Cheats page, second half.
@@ -9062,9 +9076,12 @@ namespace
         // (death_message_transplant.inc); armed for this one retail call.
         TransplantState outerTransplant = ArmTransplant(replacementAttempted, originalTarget);
         const WatchCaptureState primaryCapture = WatchCaptureBegin();
+        if (replacementAttempted)
+            ArmSourceVentAnchor(originalTarget, sourceEntity);
         gWatching = true;
         gSpawnHandler.thiscall<void>(self, message);
         gWatching = false;
+        DisarmSourceVentAnchor();
         const uintptr_t primaryActor = WatchCaptureEnd(primaryCapture);
         gPendingDirectPlacement = false;   // armed for this call only
         void* const primaryComponent = RestoreTransplant(outerTransplant);
@@ -9149,9 +9166,11 @@ namespace
                     outerTransplant = ArmTransplant(true, originalTarget);
                     gPendingDirectPlacement = placedDirectly;
                     const WatchCaptureState alternateCapture = WatchCaptureBegin();
+                    ArmSourceVentAnchor(originalTarget, sourceEntity);
                     gWatching = true;
                     gSpawnHandler.thiscall<void>(self, message);
                     gWatching = false;
+                    DisarmSourceVentAnchor();
                     const uintptr_t alternateActor = WatchCaptureEnd(alternateCapture);
                     gPendingDirectPlacement = false;
                     void* const alternateComponent = RestoreTransplant(outerTransplant);
@@ -9208,9 +9227,13 @@ namespace
 
         if (acceptedActor)
             WatchdogAdd(acceptedActor, reinterpret_cast<uintptr_t>(acceptedComponent), originalTarget,
-                        replacementTarget, sourceEntity, "replacement");
+                        replacementTarget, sourceEntity, "replacement", originalOwnerContext);
         if (replacementAccepted)
+        {
             VerifySequenceRecast(recast, acceptedActor, originalOwnerContext, SpawnerName(sourceEntity));
+            if (recast.applied && acceptedActor)
+                SceneGateArm(sourceEntity, acceptedActor);
+        }
 
         // A target that made exactly one recognised actor in a stock call is a
         // usable runtime template. For a replacement, the selected target is
@@ -9674,6 +9697,8 @@ namespace
                 InstallLevelOrderHook();
                 LoadVacuumBoxes();
                 InstallAirCheckHook();
+                InstallMessageProbe();
+                LogSceneGateSetup();
                 if (gPlayerQueryGuard)
                 {
                     gPlayerQueryHelperHook = VerifiedInline(

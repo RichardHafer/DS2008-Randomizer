@@ -4,7 +4,7 @@ Only files from the repo go in, never from a game folder, so no log, backup, run
 slip in. The console DLC extension (DeadSpace2008Randomizer_ConsoleDLC.asi, ds1_randomizer_assets\\dlc) is a separate release and is
 refused here.
 
-    python -I tools/make_release.py --version 1.0.0 [--out <zip>] [--list]
+    python -I tools/make_release.py --version 1.0.2 [--out <zip>] [--list]
 
 Checks before writing: the plugin is newer than every source file, the configurator is newer than its sources,
 the release INI parses and names every key with a value, and no file of the console DLC is in the plan.

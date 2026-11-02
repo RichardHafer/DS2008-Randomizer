@@ -67,7 +67,7 @@ namespace DS2008RandomizerConfig
                 "How often an eligible enemy is replaced. Zero keeps every original enemy.",
                 "100", "100", 0, 100),
             Toggle("General", "MenuVersionLabel", "Main menu version label",
-                "Show Dead Space 2008 Randomizer v1.0.0 beside the game version and DeadSpaceFixes when loaded.", "1", "1"),
+                "Show Dead Space 2008 Randomizer v1.0.2 beside the game version and DeadSpaceFixes when loaded.", "1", "1"),
 
             Toggle("Enemy sources", "EnemyRandomizerSource_Zombie", "Randomize Slashers",
                 "Include Zombie-class spawns, including Twitchers and Wheezers, as sources.", "1", "1"),
@@ -188,6 +188,21 @@ namespace DS2008RandomizerConfig
                 "Allow compatible Pregnant, Infector and Super Brute replacements with minimal sidecars.", "1", "1"),
             Toggle("Enemy behavior", "EnemyRandomizerIgnoreVentSurface", "Mix vent surfaces",
                 "Match the vent arrival mode without requiring the original floor, wall or ceiling surface.", "1", "1"),
+            Toggle("Enemy behavior", "EnemyRandomizerSourceVentAnchor", "Replacements use the original vent",
+                "A replacement that climbs out of a vent uses the vent of the enemy it replaces, never the one its " +
+                "donor came from in another chapter.", "1", "1"),
+            Toggle("Enemy behavior", "EnemyRandomizerKeepSceneActors", "Keep cutscene enemies",
+                "Scripted enemies that play a cutscene animation keep their original enemy, so the scene and the " +
+                "door it opens still work (chapter 1, the door to Tram Control).", "1", "1"),
+            Toggle("Enemy behavior", "SceneGateFallback", "Finish stuck scripted scenes",
+                "When a replaced scripted enemy never finishes its scene, the plugin sends the scene's end message " +
+                "itself after the delay below, so the level can go on.", "1", "1"),
+            Number("Enemy behavior", "SceneGateFallbackSeconds", "Stuck scene delay (s)",
+                "How long a scripted scene of a replaced enemy may take before the plugin finishes it.", "30", "30",
+                10, 300),
+            Toggle("Enemy behavior", "WatchdogReleaseOnVanish", "Count enemies that vanish",
+                "A replacement removed by the game while still alive still sends the death message its room waits " +
+                "for, so the doors open.", "1", "1"),
 
             Number("More enemies", "SpawnsPerTrigger", "Enemies per trigger",
                 "Fallback count for enemy classes without an EnemyType override. One is original.", "1", "1", 1, 16),

@@ -26,8 +26,8 @@ ASI Loader and everything happens in memory while you play.
 | Enemy replacement | Slashers, Lurkers, Leapers, Exploders, Infectors, Pregnants, Swarmers, Brutes, Dividers and their enhanced forms take part. Any chapter can throw any of them at you. Seeded: the same `EnemyRandomizerSeed` gives the same run. |
 | Cross-family swaps | A spawn may become a different species, not just another look of the same one. Vent spawns keep their vent and arrival, direct spawns stay direct. |
 | Difficulty ramp | Enhanced variants, Twitchers and the Hunter become more common as the campaign goes on, capped at `EnemyRandomizerLateCapPercent` of a family. |
-| Scripted rooms | Rooms that wait for their enemies to die still open: the replacement carries the death message the room counts. |
-| Watchdog | A replacement that never arrives or never dies is reported in the log and released after a leash, so a room cannot lock you in. |
+| Scripted rooms | Rooms that wait for their enemies to die still open: the replacement carries the death message the room counts. Enemies that act in a cutscene stay as authored, and a scripted scene a replacement cannot finish is ended after `SceneGateFallbackSeconds`. |
+| Watchdog | A replacement that never arrives, never dies or disappears alive is reported in the log and released, so a room cannot lock you in. |
 | Leg length correction | Enemies on another species' rig keep their feet on the floor. |
 | Store fast scroll | PageUp/PageDown (or LT/RT) jump a page in the store, Ctrl+PageUp/PageDown to the first or last item. |
 | Engine limits | More sound bank slots for the extra enemy voices (`SoundBankSlots`), plus two crash guards for engine paths the extra enemies reach. |
@@ -82,7 +82,7 @@ Dead Space/
 If the folder already has a `winmm.dll` from another mod, keep that one; it is
 most likely the same loader.
 
-Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.1" next
+Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.2" next
 to the game version when the plugin is running.
 
 Settings live in `DeadSpace2008Randomizer.ini`, and
@@ -96,7 +96,7 @@ screen until that pool is ready. That is on purpose.
 
 The console DLC suits and weapons are a separate add-on:
 [DS2008-ConsoleDLC](https://github.com/RichardHafer/DS2008-ConsoleDLC). It needs
-randomizer 1.0.1 or later when both are installed.
+randomizer 1.0.2 or later when both are installed.
 
 Works next to DeadSpaceFixes. To uninstall, delete
 `plugins\DeadSpace2008Randomizer.asi` (and `winmm.dll` if no other mod uses
@@ -169,7 +169,7 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`tools\make_release.py --version 1.0.1` builds the release zip. It needs the
+`tools\make_release.py --version 1.0.2` builds the release zip. It needs the
 enemy pool archives and the Ultimate ASI Loader's `winmm.dll`, which are not
 part of the repository: the pool is game-derived and ships with the release,
 not with the code.

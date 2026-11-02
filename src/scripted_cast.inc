@@ -275,6 +275,7 @@
     void __stdcall StreamEntityTeardown_Hook(void* simManager, uint32_t stream)
     {
         gStreamEntityTeardownHook.stdcall<void>(simManager, stream);
+        NoteStreamTeardown(stream);
         unsigned kept = 0;
         for (unsigned i = 0; i < gRecastActorCount; ++i)
         {
@@ -299,7 +300,8 @@
 
     void InstallScriptedCast()
     {
-        if (!gEnemyRandomizer || !gEnemyRandomizerScriptedVariants)
+        // The watchdog needs the teardowns too: a vanished replacement whose room unloaded stays silent.
+        if (!gEnemyRandomizer || (!gEnemyRandomizerScriptedVariants && !gWatchdog))
             return;
         gStreamEntityTeardownHook = VerifiedInline(reinterpret_cast<void*>(kStreamEntityTeardown),
                                                    reinterpret_cast<void*>(&StreamEntityTeardown_Hook));

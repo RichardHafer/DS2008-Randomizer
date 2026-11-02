@@ -24,8 +24,14 @@
     constexpr uint32_t kDismemberableHealthVtable = 0x00C60F78;
     constexpr unsigned kWatchScanMs = 500;
 
+    // Defined in scene_gates.inc, driven by the same tick.
+    void SceneGateTick();
+    void SceneGateReset(const char* why);
+
     bool gWatchdog = true;
     bool gWatchdogRelease = true;
+    // A replacement destroyed alive (not by its own stream unloading) still owes the room its death message.
+    bool gWatchdogReleaseOnVanish = true;
     bool gWatchdogReleaseWaitingTrigger = true;
     unsigned gWatchdogLeashMs = 90000;
     unsigned gWatchdogProbeMs = 20000;
@@ -48,6 +54,7 @@
         uint32_t expectedHash;   // 0 = the source sends none
         const char* expectedName;
         Guid128 spawner;
+        uint32_t sourceStream;   // the spawner's owner stream; 0 = unknown
         const char* role;
         bool foreignDonor;       // from the global pool, so its own triggers belong to another level
         unsigned long long addedMs;
@@ -69,6 +76,33 @@
          gWatchBroadcast = 0, gWatchKillFailed = 0, gWatchReportOnly = 0, gWatchFaults = 0, gWatchWrongThread = 0,
          gWatchActive = 0, gWatchLines = 0, gWatchGone = 0;
     unsigned gVentClearCount = 0, gVentClearMinMs = 0xFFFFFFFFu, gVentClearMaxMs = 0;
+    LONG gWatchVanishSent = 0, gWatchVanishStream = 0;
+
+    // Streams the SimManager tore down (scripted_cast.inc's hook), with the running time.
+    struct StreamTeardownNote
+    {
+        uint32_t stream;
+        unsigned long long atMs;
+    };
+    constexpr unsigned kStreamTeardownNotes = 32;
+    StreamTeardownNote gStreamTeardownNotes[kStreamTeardownNotes]{};
+    unsigned gStreamTeardownNext = 0;
+
+    void NoteStreamTeardown(uint32_t stream)
+    {
+        gStreamTeardownNotes[gStreamTeardownNext % kStreamTeardownNotes] = {stream, gRunningMs};
+        ++gStreamTeardownNext;
+    }
+
+    bool StreamTornDownSince(uint32_t stream, unsigned long long sinceMs)
+    {
+        if (!stream)
+            return false;
+        for (unsigned i = 0; i < kStreamTeardownNotes && i < gStreamTeardownNext; ++i)
+            if (gStreamTeardownNotes[i].stream == stream && gStreamTeardownNotes[i].atMs >= sinceMs)
+                return true;
+        return false;
+    }
     unsigned long long gVentClearSumMs = 0;
 
     void WatchCapture_Hook(safetyhook::Context& ctx)
@@ -183,7 +217,7 @@
     }
 
     void WatchdogAdd(uintptr_t actor, uintptr_t health, const Guid128& source, const Guid128& donor,
-                     const Guid128& spawner, const char* role)
+                     const Guid128& spawner, const char* role, uint32_t sourceStream = 0)
     {
         if (!gWatchdog || !gRunningTickHook || !actor)
             return;
@@ -214,6 +248,7 @@
         entry.expectedHash = message ? message->hash : 0;
         entry.expectedName = message ? message->name : "no death message";
         entry.spawner = spawner;
+        entry.sourceStream = sourceStream;
         entry.role = role;
         entry.foreignDonor = ForeignDonor(donor);
         entry.addedMs = gRunningMs;
@@ -240,6 +275,7 @@
         if (gWatchEntryCount && ++gWatchLines <= 64)
             Log("watchdog: %u entries dropped (%s)", gWatchEntryCount, why);
         gWatchEntryCount = 0;
+        SceneGateReset(why);
     }
 
     // A replacement's donor comes from another level: an activation trigger it
@@ -289,10 +325,24 @@
             // which ones go, and how: a multiplied copy that vanishes looks like a spawn that never doubled
             if (++gWatchVanished <= 48)
                 Log("watchdog: %s actor %08X for %s vanished after %u ms (%s changed; last damage %.0f, initialised %d, "
-                    "activated %d, vent cleared %d)", e.role ? e.role : "?", static_cast<unsigned>(e.actor),
-                    e.expectedName ? e.expectedName : "?", e.ageMs, changed, e.lastDamage, e.initialised,
-                    e.activated, e.ventCleared);
-            return WatchAction::Drop;
+                    "activated %d, vent cleared %d, moved %d, shown %d)", e.role ? e.role : "?",
+                    static_cast<unsigned>(e.actor), e.expectedName ? e.expectedName : "?", e.ageMs, changed,
+                    e.lastDamage, e.initialised, e.activated, e.ventCleared, e.moved, e.shown);
+            // Gone without dying: the room still counts on its message, unless the spawner's own stream went
+            // with it (the authored enemy would have gone the same way, silently).
+            if (!e.expectedHash || !gWatchdogRelease || !gWatchdogReleaseOnVanish)
+                return WatchAction::Drop;
+            if (StreamTornDownSince(e.sourceStream, e.addedMs))
+            {
+                ++gWatchVanishStream;
+                Log("watchdog: %s at %s went with its spawner's stream %X; %s not sent", e.role,
+                    SpawnerName(e.spawner), e.sourceStream, e.expectedName);
+                return WatchAction::Drop;
+            }
+            ++gWatchVanishSent;
+            Log("watchdog verdict: %s at %s was destroyed alive after %u s; %s broadcast so the room can go on",
+                e.role, SpawnerName(e.spawner), e.ageMs / 1000, e.expectedName);
+            return WatchAction::Send;
         }
         if (!e.health)
             e.health = HealthComponentOf(e.actor);
@@ -405,8 +455,9 @@
         if (e.ageMs < gWatchdogLeashMs)
             return WatchAction::Keep;
         const bool waiting = std::strcmp(verdict, "waiting_trigger") == 0;
+        // "hidden" reads +0x154, which stays set on some enemies the player fights; a hurt one is reachable.
         const bool release = std::strcmp(verdict, "inert") == 0 || std::strcmp(verdict, "stuck_in_vent") == 0 ||
-                             std::strcmp(verdict, "hidden") == 0 ||
+                             (std::strcmp(verdict, "hidden") == 0 && !e.damaged) ||
                              (waiting && gWatchdogReleaseWaitingTrigger && e.foreignDonor);
         if (!release || !gWatchdogRelease || !e.expectedHash)
         {
@@ -438,6 +489,7 @@
         const ULONGLONG gap = last ? now - last : 0;
         last = now;
         gRunningMs += gap > 100 ? 33 : gap;
+        SceneGateTick();
         if (!gWatchEntryCount || gRunningMs - lastScan < kWatchScanMs)
             return;
         lastScan = gRunningMs;
@@ -486,6 +538,7 @@
                 BroadcastDeathMessage(entry.expectedHash);
                 break;
             case WatchAction::Send:
+                // no component, or the actor is gone: broadcast only
                 BroadcastDeathMessage(entry.expectedHash);
                 break;
             }
@@ -499,6 +552,8 @@
         gWatchdogRelease = GetPrivateProfileIntA("DeadSpace2008Randomizer", "WatchdogRelease", 1, gIniPath) != 0;
         gWatchdogReleaseWaitingTrigger =
             GetPrivateProfileIntA("DeadSpace2008Randomizer", "WatchdogReleaseWaitingTrigger", 1, gIniPath) != 0;
+        gWatchdogReleaseOnVanish =
+            GetPrivateProfileIntA("DeadSpace2008Randomizer", "WatchdogReleaseOnVanish", 1, gIniPath) != 0;
         int leash = GetPrivateProfileIntA("DeadSpace2008Randomizer", "WatchdogLeashSeconds", 90, gIniPath);
         int probe = GetPrivateProfileIntA("DeadSpace2008Randomizer", "WatchdogProbeSeconds", 20, gIniPath);
         leash = leash < 20 ? 20 : leash > 600 ? 600 : leash;
@@ -521,11 +576,12 @@
                                               reinterpret_cast<void*>(&RunningTick_Hook));
         if (!gRunningTickHook)
             gWatchCaptureHook = {};
-        Log("watchdog %s: capture %08X, tick %08X; leash %u s, probe %u s, release %s%s%s",
+        Log("watchdog %s: capture %08X, tick %08X; leash %u s, probe %u s, release %s%s%s%s",
             gRunningTickHook ? "active" : "NOT installed", static_cast<unsigned>(kWatchCaptureSite),
             static_cast<unsigned>(kRunningTickTask), gWatchdogLeashMs / 1000, gWatchdogProbeMs / 1000,
             gWatchdogRelease ? "on" : "off (report only)",
             gWatchdogReleaseWaitingTrigger ? ", also pool donors waiting for their trigger" : "",
+            gWatchdogReleaseOnVanish ? ", and the message of one destroyed alive" : "",
             gDeathMessageTransplant ? "" : "; WARNING: DeathMessageTransplant=0, so a working replacement "
                                            "still dies with its donor's message");
     }
@@ -538,9 +594,10 @@
             return;
         std::memcpy(last, now, sizeof(now));
         Log("watchdog totals: %ld watched, %ld became working enemies, %ld died, %ld released by ForceKill, "
-            "%ld broadcast, %ld kill failed, %ld left alone at the leash, %ld vanished, %ld left the world alive, %ld faults, %ld wrong thread; "
-            "vent exit %u x, %u-%u ms, mean %llu ms",
-            now[0], gWatchActive, now[1], now[2], now[3], gWatchKillFailed, now[4], gWatchVanished, gWatchGone, now[5],
+            "%ld broadcast, %ld kill failed, %ld left alone at the leash, %ld vanished (%ld of them sent, %ld with their "
+            "stream), %ld left the world alive, %ld faults, %ld wrong thread; vent exit %u x, %u-%u ms, mean %llu ms",
+            now[0], gWatchActive, now[1], now[2], now[3], gWatchKillFailed, now[4], gWatchVanished, gWatchVanishSent,
+            gWatchVanishStream, gWatchGone, now[5],
             gWatchWrongThread, gVentClearCount, gVentClearCount ? gVentClearMinMs : 0, gVentClearMaxMs,
             gVentClearCount ? gVentClearSumMs / gVentClearCount : 0ull);
     }

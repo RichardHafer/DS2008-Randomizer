@@ -40,14 +40,15 @@
         // +0x1D0 (centre) and +0x1DC (radius) in the units the placement
         // readout prints, so the player's zone can be named directly.
         { "ZoneRender",         0x00732340, true, 0x00C842F0 },
-        // The three the cheat page needs. The class registry lists a factory
+        // The ones the cheat page needs. The class registry lists a factory
         // thunk that allocates and then calls the constructor; reading that call
         // from the decrypted dump gives these (checked against PowerUp, whose
         // factory 00409F80 resolves to the known constructor).
         // These are managers, not placed objects, and do not start with a vtable
         // (the first inventory read showed a heap pointer at offset 0). The false
         // makes the liveness test use the freed-block fill instead.
-        { "PlayerMX9Inventory", 0x0072D590, false, 0x00C85278 },   // the RIG inventory
+        // No PlayerMX9Inventory entry: the address once listed for it,
+        // 0x0072D590, is Entity::Entity, which every entity runs through.
         { "WeaponManager",      0x00506DC0, false, 0x00C6ED28 },
         { "PickupItem",         0x00512650, false, 0x00C6F808 },
         // Playing dead does not survive an extra spawn: in game the enemies came

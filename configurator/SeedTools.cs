@@ -702,7 +702,7 @@ namespace DS2008RandomizerConfig
                 var info = new StringBuilder();
                 info.AppendLine("Dead Space 2008 Randomizer bug report, " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss",
                     CultureInfo.InvariantCulture));
-                info.AppendLine("Configurator 1.0.0, game folder " + folder);
+                info.AppendLine("Configurator 1.0.2, game folder " + folder);
                 info.AppendLine("Seed code: " + seedCode);
                 info.AppendLine("Dead Space.exe: " + Describe(Path.Combine(folder, "Dead Space.exe")));
                 info.AppendLine("winmm.dll (ASI loader): " + Describe(Path.Combine(folder, "winmm.dll")));

@@ -12,7 +12,6 @@
 {{{0xD5110002u, 0xE00000FEu, 0x50315344u, 0x314C4F4Fu}}, "Exploder", "exploder", false, 1},
 {{{0xD5110003u, 0xE000000Bu, 0x50315344u, 0x314C4F4Fu}}, "DividerCore", "divider", false, 1},
 {{{0xD5110003u, 0xE0000014u, 0x50315344u, 0x314C4F4Fu}}, "Infector", "infector", false, 1},
-{{{0xD5110003u, 0xE0000015u, 0x50315344u, 0x314C4F4Fu}}, "Infector", "infector", false, 1},
 {{{0xD5110004u, 0xE000000Du, 0x50315344u, 0x314C4F4Fu}}, "Zombie", "zombie", false, 1},
 {{{0xD5110004u, 0xE000000Eu, 0x50315344u, 0x314C4F4Fu}}, "Zombie", "zombievar1", false, 1},
 {{{0xD5110004u, 0xE000000Fu, 0x50315344u, 0x314C4F4Fu}}, "Zombie", "zombiewoman", false, 1},

@@ -21,6 +21,9 @@
     // Defined in variant_runtime.inc. Both features need this decoder and two inline
     // hooks on one function would fight, so one hook calls both.
     void ApplyVariantSpawnPlacement(void* component);
+    // Defined in scene_gates.inc: a replacement's vent arrival takes the source's VentMarker.
+    void ApplySourceVentAnchor(void* component);
+    bool SourceVentAnchorWanted();
 
     constexpr uintptr_t kSpawningDecode = 0x004561C0;
     constexpr unsigned kSpawnKind = 0x0C;
@@ -228,6 +231,7 @@
         gSpawningDecodeHook.thiscall<void>(self, attributes);
         ApplySpawnKind(self);
         ApplyVariantSpawnPlacement(self);
+        ApplySourceVentAnchor(self);
     }
 
     void LoadCorpseSettings()
@@ -248,7 +252,7 @@
         // from a vent, and a direct spawn is made by writing the arrival kind
         // back to the constructor default on the finished object.
         // A randomized directly placed spawner may get a vent donor, placed the same way.
-        if (!gCorpseRandomizer && !gSuperExploderWanted && !gDirectPlacementWanted)
+        if (!gCorpseRandomizer && !gSuperExploderWanted && !gDirectPlacementWanted && !SourceVentAnchorWanted())
             return;
         gSpawningDecodeHook = VerifiedInline(
             reinterpret_cast<void*>(kSpawningDecode),
