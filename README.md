@@ -39,6 +39,13 @@ ASI Loader and everything happens in memory while you play.
 | First weapon | The Plasma Cutter at the start becomes another weapon, with matching ammo. |
 | Chapter order | Chapters 2 to 11 in a seeded order; chapter 1 stays first and chapter 12 last. |
 | Oxygen | One air budget for vacuum, picked by the seed. |
+| Seeded progression | Schematics, store gates and starting weapons follow the seed (`ProgressionSeeded`, `ProgressionStoreGate`, `ProgressionStartingWeapons`). |
+| Zero-G variants | Zero-G rooms get the enemies that can float (`EnemyRandomizerZeroGVariants`). |
+| Limbs | Each enemy kind gets its weak limb moved and its limb costs rotated for the run (`LimbWeakSpotRandomizer`, `LimbSeverCostRandomizer`). |
+| Upgrade benches | Which upgrade nodes each bench offers (`UpgradeBenchRandomizer`, experimental). |
+| Damage | Enemies take twice the damage (`DamageMultiplier=2`; 1 is the game's own). |
+| Tutorial tips | Skipped (`SkipTutorialTips`). |
+| Enemies kept loaded | Enemy characters stay through deaths and chapter changes (`EnemyRandomizerNeverUnload`, experimental). |
 
 **Off by default, turn on in the INI or in the settings window**
 
@@ -46,9 +53,8 @@ ASI Loader and everything happens in memory while you play.
 |---|---|
 | `LootAmmoPercent`, `LootCreditsPercent` | Ammo and credit pickups in fixed percent of what the game authored (with `LootAutoScale=0`). |
 | `StartingSuitRandomizer` | Start in a random suit and pay for it from future credit income (`StartingSuitCreditShare`). |
-| `UpgradeBenchRandomizer` | Which upgrade nodes each bench offers (experimental). |
-| `LimbWeakSpotRandomizer`, `LimbProfilePool`, `LimbSeverCostRandomizer` | Move where an enemy's weak limb is and what cutting each limb is worth. |
-| `GodMode`, `DamageMultiplier` | Practice helpers, also as toggle keys. |
+| `LimbProfilePool` | Each ordinary kind takes the limb profile of another species instead (overrides the weak spot setting). |
+| `GodMode` | Practice helper, also as a toggle key. |
 
 Every patch site is checked against the Steam bytes before it is placed, and
 the log says which ones went in. An unsupported build is left alone.
