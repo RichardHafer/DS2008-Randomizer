@@ -143,6 +143,9 @@
     // one is fiddly and reads as a broken pickup. They may drop from breakable
     // crates instead (ApplyBreakablePowerNode).
     constexpr unsigned kCratePowerNode = 6;
+    // Two lockers are empty on purpose ("None"); they keep that, and nothing
+    // else may draw it.
+    constexpr unsigned kCrateNone = 11;
     // Share of the retail node count that moves to breakable crates, per chapter.
     unsigned gCratePowerNodePercent = 100;
 
@@ -157,7 +160,7 @@
         unsigned others[kFixedCrateCount]{};
         unsigned otherCount = 0;
         for (unsigned i = 0; i < kFixedCrateCount; ++i)
-            if (kFixedCrates[i].item != kCratePowerNode)
+            if (kFixedCrates[i].item != kCratePowerNode && kFixedCrates[i].item != kCrateNone)
                 others[otherCount++] = i;
         uint32_t state = gStartingSuitSeed ^ 0x43524154u;
         auto next = [&state]() {
