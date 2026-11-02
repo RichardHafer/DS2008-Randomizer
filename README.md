@@ -43,7 +43,7 @@ ASI Loader and everything happens in memory while you play.
 | Zero-G variants | Zero-G rooms get the enemies that can float (`EnemyRandomizerZeroGVariants`). |
 | Limbs | Each enemy kind gets its weak limb moved and its limb costs rotated for the run (`LimbWeakSpotRandomizer`, `LimbSeverCostRandomizer`). |
 | Upgrade benches | Which upgrade nodes each bench offers (`UpgradeBenchRandomizer`, experimental). |
-| Damage | Enemies take twice the damage (`DamageMultiplier=2`; 1 is the game's own). |
+| Damage | Off: enemies take the game's own damage (`DamageMultiplier=1`; 2 doubles it). |
 | Tutorial tips | Skipped (`SkipTutorialTips`). |
 | Enemies kept loaded | Enemy characters stay through deaths and chapter changes (`EnemyRandomizerNeverUnload`, experimental). |
 
@@ -87,7 +87,7 @@ Dead Space/
 If the folder already has a `winmm.dll` from another mod, keep that one; it is
 most likely the same loader.
 
-Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.2" next
+Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.3" next
 to the game version when the plugin is running.
 
 Settings live in `DeadSpace2008Randomizer.ini`, and
@@ -174,7 +174,7 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`tools\make_release.py --version 1.0.2` builds the release zip. It needs the
+`tools\make_release.py --version 1.0.3` builds the release zip. It needs the
 enemy pool archives and the Ultimate ASI Loader's `winmm.dll`, which are not
 part of the repository: the pool is game-derived and ships with the release,
 not with the code.

@@ -1,4 +1,4 @@
-Dead Space 2008 Randomizer 1.0.2
+Dead Space 2008 Randomizer 1.0.3
 Dead Space (2008), Steam version
 
 WHAT IT DOES
@@ -25,7 +25,7 @@ INSTALL
      DeadSpace1Progression*.tsv           (schematic and store lists)
 3. If the folder already has a winmm.dll from another mod, keep that one; it is
    most likely the same loader.
-4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.2" next to the
+4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.3" next to the
    game version when the plugin is running.
 
 SETTINGS

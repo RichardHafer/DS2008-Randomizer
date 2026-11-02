@@ -702,13 +702,8 @@ namespace
             "DeadSpace2008Randomizer", "EnemyRandomizerGlobalStreaming", 1,
             gIniPath) != 0;
         gRandomizerMenuDraft.globalResources = templates && streaming;
-        gRandomizerMenuDraft.spawnsPerTrigger = static_cast<unsigned>(
-            GetPrivateProfileIntA("DeadSpace2008Randomizer", "SpawnsPerTrigger", 1,
-                                  gIniPath));
-        if (gRandomizerMenuDraft.spawnsPerTrigger < 1)
-            gRandomizerMenuDraft.spawnsPerTrigger = 1;
-        if (gRandomizerMenuDraft.spawnsPerTrigger > 16)
-            gRandomizerMenuDraft.spawnsPerTrigger = 16;
+        // fixed at 1 since 1.0.3: the per-enemy counts (EnemyType_<class>) are the setting
+        gRandomizerMenuDraft.spawnsPerTrigger = 1;
         gRandomizerMenuDraft.progressionRandomizer = GetPrivateProfileIntA(
             "DeadSpace2008Randomizer", "ProgressionRandomizer", 0, gIniPath) != 0;
         gRandomizerMenuDraft.preset = 0;
@@ -741,7 +736,7 @@ namespace
             gRandomizerMenuDraft.chance = 100;
             gRandomizerMenuDraft.crossFamily = true;
             gRandomizerMenuDraft.globalResources = true;
-            gRandomizerMenuDraft.spawnsPerTrigger = 3;
+            gRandomizerMenuDraft.spawnsPerTrigger = 1;
             gRandomizerMenuDraft.progressionRandomizer = false;
             break;
         case 4: // vanilla
@@ -843,8 +838,7 @@ namespace
                           gRandomizerMenuDraft.globalResources ? on : off);
             break;
         case 6:
-            std::snprintf(text, capacity, "Enemies per trigger     %u",
-                          gRandomizerMenuDraft.spawnsPerTrigger);
+            std::snprintf(text, capacity, "Enemies per trigger     1 (per enemy in the INI)");
             break;
         case 7:
             std::snprintf(text, capacity, "Manifest shop+schematics %s  [experimental]",
@@ -900,12 +894,8 @@ namespace
             break;
         case 6:
         {
-            int count = static_cast<int>(draft.spawnsPerTrigger) + direction;
-            if (count < 1)
-                count = 1;
-            if (count > 16)
-                count = 16;
-            draft.spawnsPerTrigger = static_cast<unsigned>(count);
+            (void)direction;
+            draft.spawnsPerTrigger = 1;
             break;
         }
         case 7:
@@ -4669,7 +4659,7 @@ namespace
 
     // EnemyType_<Class>: how many enemies of that class arrive on a trigger.
     // 1 is the game as shipped and 0 also leaves it alone; a class without a
-    // line of its own uses SpawnsPerTrigger.
+    // line of its own brings one (the original count).
     void LoadEnemyPercents()
     {
         gEnemyRandomizerSourceFlagsLoaded = false;
@@ -4854,8 +4844,7 @@ namespace
             "DeadSpace2008Randomizer", "NoClipHotkey", 0x76, gIniPath);
         gNoClipSpeed = static_cast<float>(GetPrivateProfileIntA(
             "DeadSpace2008Randomizer", "NoClipSpeedCm", 50, gIniPath)) / 100.0f;
-        gExtraSpawns = static_cast<unsigned>(GetPrivateProfileIntA(
-            "DeadSpace2008Randomizer", "SpawnsPerTrigger", 1, gIniPath));
+        gExtraSpawns = 1;   // fixed since 1.0.3; EnemyType_<class> sets the count per enemy
         gExtraSpawnDiagnostics = GetPrivateProfileIntA(
             "DeadSpace2008Randomizer", "ExtraSpawnDiagnostics", 0, gIniPath) != 0;
         gLevelOrderDiagnostics = GetPrivateProfileIntA(
@@ -4885,11 +4874,9 @@ namespace
         LoadLootAmountSettings();
         LoadWatchdogSettings();
         LoadSceneGateSettings();
-        gExtraSpawns = static_cast<unsigned>(
-            GetPrivateProfileIntA("DeadSpace2008Randomizer", "SpawnsPerTrigger",
-                                  GetPrivateProfileIntA("DeadSpace2008Randomizer",
-                                      "ExtraSpawnsPerTrigger", 1, gIniPath),
-                                  gIniPath));
+        // The global count is fixed at 1 since 1.0.3 (an old SpawnsPerTrigger line is ignored);
+        // each enemy class has its own EnemyType_<class> count.
+        gExtraSpawns = 1;
         gDiscover = GetPrivateProfileIntA("DeadSpace2008Randomizer", "DiscoverClasses",
                                           0, gIniPath) != 0;
         gEnemyRandomizer = GetPrivateProfileIntA("DeadSpace2008Randomizer",

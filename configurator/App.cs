@@ -13,9 +13,9 @@ using ConfigSwitch = DS2CoopConfig.Switch;
 [assembly: AssemblyProduct("Dead Space 2008 Randomizer")]
 [assembly: AssemblyCompany("Richard Hafer")]
 [assembly: AssemblyCopyright("Copyright © 2026 Richard Hafer")]
-[assembly: AssemblyVersion("1.0.2.0")]
-[assembly: AssemblyFileVersion("1.0.2.0")]
-[assembly: AssemblyInformationalVersion("1.0.2")]
+[assembly: AssemblyVersion("1.0.3.0")]
+[assembly: AssemblyFileVersion("1.0.3.0")]
+[assembly: AssemblyInformationalVersion("1.0.3")]
 
 namespace DS2008RandomizerConfig
 {
@@ -41,7 +41,7 @@ namespace DS2008RandomizerConfig
         private string filePath;
         private bool loading;
 
-        internal const string AppVersion = "1.0.2";
+        internal const string AppVersion = "1.0.3";
         internal const string Author = "Richard Hafer";
         internal const string RepoUrl = "https://github.com/RichardHafer/DS2008-Randomizer";
         internal const string DlcRepoUrl = "https://github.com/RichardHafer/DS2008-ConsoleDLC";

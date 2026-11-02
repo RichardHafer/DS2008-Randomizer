@@ -16,7 +16,7 @@
     // credits, since a pickup worth 0 vanishes empty.
     //
     // LootAutoScale=1 derives both percentages from the More enemies counts
-    // (EnemyType_<class>, else SpawnsPerTrigger): each class weighs by how often
+    // (EnemyType_<class>, else 1): each class weighs by how often
     // the campaign spawns it and how much ammo one costs, so doubling the Slashers
     // counts for far more than doubling the Brutes. Only half of that extra is
     // given, since the added enemies drop loot themselves.
@@ -59,8 +59,7 @@
     // What the More enemies counts add up to, in per cent of the authored fights.
     unsigned LootAutoPercent(char* detail, size_t detailSize)
     {
-        const unsigned fallback = static_cast<unsigned>(
-            GetPrivateProfileIntA("DeadSpace2008Randomizer", "SpawnsPerTrigger", 1, gIniPath));
+        const unsigned fallback = 1;   // SpawnsPerTrigger is fixed at 1 since 1.0.3
         uint64_t authored = 0, now = 0;
         int used = 0;
         for (const LootScaleClass& c : kLootScaleClasses)
