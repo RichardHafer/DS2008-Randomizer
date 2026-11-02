@@ -2813,17 +2813,25 @@ namespace
         return gEnemyRandomizerCrossFamilyContexts || DirectSourceOfClass(actorClass);
     }
 
-    // Lurkers stick to floors and ceilings: a side-wall vent leaves them hanging on the wall (DS2 showed the same).
-    // Floor, ceiling, angled and unknown-surface vents and direct placement stay allowed.
-    volatile LONG gLurkerWallVentRejects = 0;
+    // A Lurker climbing out of a side-wall or ceiling vent hangs in the air next to it. Outside its own
+    // spots it may only be placed directly or come out of a floor vent.
+    volatile LONG gLurkerVentRejects = 0;
 
     bool LurkerBlockedAt(const SpawnCompatibilitySource& source, const char* candidateClass)
     {
-        if (!candidateClass || std::strcmp(candidateClass, "Lurker") != 0 ||
-            !(source.context & kSpawnContextVentSideWallNormal))
+        if (!candidateClass || std::strcmp(candidateClass, "Lurker") != 0)
             return false;
-        if (InterlockedIncrement(&gLurkerWallVentRejects) <= 8)
-            Log("enemy randomizer: no Lurker for %s/%s, its vent is on a side wall", source.actorClass,
+        if (source.actorClass && std::strcmp(source.actorClass, "Lurker") == 0)
+            return false;
+        const uint32_t badVent = kSpawnContextVentSideWallNormal | kSpawnContextVentCeilingNormal |
+                                 kSpawnContextVentAngledNormal | kSpawnContextVentUnknownSurface |
+                                 kSpawnContextCeiling | kSpawnContextWallOrClimb;
+        const bool vent = (source.context & kSpawnContextVent) != 0;
+        const bool floor = (source.context & (kSpawnContextVentFloorNormal | kSpawnContextFloorVent)) != 0;
+        if (!vent || (floor && !(source.context & badVent)))
+            return false;
+        if (InterlockedIncrement(&gLurkerVentRejects) <= 8)
+            Log("enemy randomizer: no Lurker for %s/%s, its vent is not on the floor", source.actorClass,
                 source.variant);
         return true;
     }
