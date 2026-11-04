@@ -76,9 +76,26 @@ See [release notes](release/CHANGELOG.md) for the changes since 1.0.3.
 
 Made for the Steam release of Dead Space (version 1.0.0.222).
 
-Close the game, open the game folder (Steam: right-click Dead Space > Manage >
-Browse local files, the folder with `Dead Space.exe`) and extract the archive
-into it. The installed files should look like this:
+Close the game and open its folder (Steam: right-click Dead Space > Manage >
+Browse local files, the folder containing `Dead Space.exe`). Each GitHub release
+provides both downloads:
+
+| Download | Current version | When needed |
+|---|---|---|
+| `DeadSpace2008Randomizer_Plugin_v1.0.4.zip` | Plugin 1.0.4 | First installation and plugin updates; contains the ASI, settings window, default INI, progression tables and ASI loader. |
+| `DeadSpace2008Randomizer_PoolAssets_v1.0.0.zip` | Pool Assets 1.0.0 | First installation, or when a release requires a new pool version; contains the enemy and sound archives. |
+
+For a first installation, extract **both ZIPs** into the game folder, keeping
+their folders. For a plugin update, download only the Plugin ZIP when its required
+pool version is already installed. Back up your INI before extracting and keep
+your customized settings. Both ZIPs remain attached to every GitHub release;
+the pool version changes only when its archives change.
+
+Plugin **1.0.4 requires Pool Assets 1.0.0**. The pool archives are byte-identical
+to those in the old combined Randomizer 1.0.3 and 1.0.4 packages, so existing
+users of those complete packages do not need to download the pool again.
+
+The installed files should look like this:
 
 ```text
 Dead Space/
@@ -183,10 +200,20 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`tools\make_release.py --version 1.0.4` builds the release zip. It needs the
-enemy pool archives and the Ultimate ASI Loader's `winmm.dll`, which are not
-part of the repository: the pool is game-derived and ships with the release,
-not with the code.
+`python -I tools\make_release.py --version 1.0.4` builds both ZIPs. Use
+`--out-dir <folder>` to choose their destination, or `--package plugin` /
+`--package assets` to build just one. Attach both ZIPs to each GitHub release.
+
+The tracked `release/pool-assets.json` records the independent pool version and
+archive hashes. Unchanged assets keep their version across plugin releases.
+After an intentional asset change, run `python -I tools\make_release.py
+--freeze-assets <new-version>` and commit the updated manifest. The packager
+refuses changed assets under the old version. Plugin-only packaging needs the
+manifest but does not need local copies of the pool archives.
+
+The pool archives and Ultimate ASI Loader's `winmm.dll` are not part of the
+repository. Game-derived archives ship only in the Pool Assets ZIP. Run packaging
+tests with `python -B -m unittest discover -s tests`.
 
 The `src/*_generated.*` tables are built from extracted game data that is not
 in the repository; they are committed, so the plugin builds without it.

@@ -1,0 +1,323 @@
+{
+  "files": {
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary.str": {
+      "bytes": 262144,
+      "sha256": "806d3ec7a81b6008c31b1b384c8dabe96cd6004e3158180ce18ecc5a1666f354"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_0.str": {
+      "bytes": 131072,
+      "sha256": "1c5decf82ceae0138ca9e99f061a488bd40e8468612871a64b6498c7068151bd"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_1.str": {
+      "bytes": 1835008,
+      "sha256": "43220dcbfcb588383858d897ead75f54245186680b0d930b9877b045aaee8eb5"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_10.str": {
+      "bytes": 131072,
+      "sha256": "d7189affc3f86bd4d1dfb2d5e0d01ae7d28917a8a23ff828cdfdd09e0b335c63"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_2.str": {
+      "bytes": 131072,
+      "sha256": "016c7d414af10bc1d9576d3c324c0f1ca1edb59b311fa54596a37f9ef1e48447"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_3.str": {
+      "bytes": 131072,
+      "sha256": "2a749aa2e510f607757d95d5a10bfcc5d00602d4aaada90cf35010a257b58661"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_4.str": {
+      "bytes": 917504,
+      "sha256": "1155736eef035e62d91dac1bd04aff1b7e7a0bbf80e23f17529b810f10da6858"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_5.str": {
+      "bytes": 2621440,
+      "sha256": "d12080b578c6c6d6a0dc3ff1f5e8d6406df41aac91e6e12144a21f337a559eb4"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_6.str": {
+      "bytes": 131072,
+      "sha256": "d8d84c39a826aba99f6d6cb790e5dfa5e64f25b9dee1a909afb2385010c8b3bc"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_7.str": {
+      "bytes": 524288,
+      "sha256": "3e4b818bdd21cd1fad016eca9a98eeb9bee51c3a4ce70f146c7aac732ac148ec"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_8.str": {
+      "bytes": 524288,
+      "sha256": "1cf8c824736b723766c11580226c259a9e5f4d0a5004946a67cca54df3a19325"
+    },
+    "ds1_randomizer_assets/ds1_enemy_pool_ordinary_9.str": {
+      "bytes": 524288,
+      "sha256": "dd8ed11059132c18f19b7997476cf9395c00de5de4fb776e8ad3b8f104e0f776"
+    },
+    "ds1_randomizer_assets/pool/brute.str": {
+      "bytes": 12320768,
+      "sha256": "867100d6f53714195f28972de9e51d763b3e4fe091654ae6d350c23ca7eb05e1"
+    },
+    "ds1_randomizer_assets/pool/brute_sbk.str": {
+      "bytes": 3801088,
+      "sha256": "334696d63cf1c7e94ef2004e23bb2b559233dfb6503f113ce86d14e9a9b04dae"
+    },
+    "ds1_randomizer_assets/pool/corruption_body.str": {
+      "bytes": 6029312,
+      "sha256": "a7f84fd0b0ba3152efb77f2dc5351e4f41a02228a84294700b199fb563a90c29"
+    },
+    "ds1_randomizer_assets/pool/corruption_body_sbk.str": {
+      "bytes": 655360,
+      "sha256": "c92e2d937390778f21e06db40f308d31c25b6eb532cace275c98dd4a7f998540"
+    },
+    "ds1_randomizer_assets/pool/divider.str": {
+      "bytes": 7602176,
+      "sha256": "6fe7412c6e1b10c112f9b97c8a16f60fe06853e25c2d0b81b9d1102c741184fb"
+    },
+    "ds1_randomizer_assets/pool/divider_sbk.str": {
+      "bytes": 2228224,
+      "sha256": "12b7caad6364df2a60861ce9511b24239fd317c363b9659679e5d755c34ad67b"
+    },
+    "ds1_randomizer_assets/pool/exploder.str": {
+      "bytes": 8126464,
+      "sha256": "a0a80b10fc31747fe0a86372dd2d8efd351253425078fa226c8927cfccd98b01"
+    },
+    "ds1_randomizer_assets/pool/exploder_audio.str": {
+      "bytes": 2490368,
+      "sha256": "82c49e3c9f4d95619856a57ba563a9623388e568fc2802975ec3f8e89d7ef4cc"
+    },
+    "ds1_randomizer_assets/pool/exploder_sbk.str": {
+      "bytes": 3407872,
+      "sha256": "9b10dd78def3c9a7e8c91b21cdeee0054faf4d05cf52c9e6d8495ed53686d79f"
+    },
+    "ds1_randomizer_assets/pool/female_slasher_audio.str": {
+      "bytes": 1310720,
+      "sha256": "8a65c538d9c6050babe71df74a3bd94443f8cfdaac61557e7989a3e6b03114fc"
+    },
+    "ds1_randomizer_assets/pool/guardian.str": {
+      "bytes": 9175040,
+      "sha256": "4d5cf8bfdc8b27e37447d529adaf2f836141298201b0d5c22eb69411d6f237d9"
+    },
+    "ds1_randomizer_assets/pool/guardian_pod.str": {
+      "bytes": 1572864,
+      "sha256": "8ba4d1ace472dd82b3ba8edc021c8415347973561ab7822a27203ccba8f86708"
+    },
+    "ds1_randomizer_assets/pool/guardian_pod_sbk.str": {
+      "bytes": 524288,
+      "sha256": "647b14ccbf4a04de786c22b7997c906a2503aa80a8715c1e7b8435e3ae20dad4"
+    },
+    "ds1_randomizer_assets/pool/guardian_sbk.str": {
+      "bytes": 3407872,
+      "sha256": "c4d3187e9eea45b3fc12044bbf9340298554e8543936dbd27118df3a399793e1"
+    },
+    "ds1_randomizer_assets/pool/hunter.str": {
+      "bytes": 12189696,
+      "sha256": "5f54fa7c4a7d9d5b2fcab6fafe5359c796261bd6f65c87e195e18c24e1059f9f"
+    },
+    "ds1_randomizer_assets/pool/hunter_audio.str": {
+      "bytes": 3014656,
+      "sha256": "777d485f9caa999cbd286c15fa7c4e0cef8ac6ff577b1c732f5b344a395422a5"
+    },
+    "ds1_randomizer_assets/pool/hunter_sbk.str": {
+      "bytes": 5505024,
+      "sha256": "92da084b380be6a0c85d535beb5d43c5602bc36cc7fa9c194cada7a0950ab7b6"
+    },
+    "ds1_randomizer_assets/pool/infect_hunt_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "ad04354fe2df047e14f89674d7e8b5d722aa51416dde3812a1f1096549e8cb02"
+    },
+    "ds1_randomizer_assets/pool/infector.str": {
+      "bytes": 4980736,
+      "sha256": "c334fa9368648af10080604cc59a0d763da1ed61eb23d3cda9673f2c953b207e"
+    },
+    "ds1_randomizer_assets/pool/infector_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "0fdb2958871d935169658ea060c4033d9cc1276d187d1afe9a68b297021779aa"
+    },
+    "ds1_randomizer_assets/pool/leap_infect_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "8c5889b7dca48e839f3d1f69a8ab8ed63463da2db427c842c46f66dc132f8ad5"
+    },
+    "ds1_randomizer_assets/pool/leaper.str": {
+      "bytes": 8257536,
+      "sha256": "6d91939cd029f4daf2f7c12ffea3d5bcaca56db4b6f0eaafd79da9d480f1da30"
+    },
+    "ds1_randomizer_assets/pool/leaper_audio.str": {
+      "bytes": 1179648,
+      "sha256": "1e330d7b6a5ec383f4b32fc61c3e8b4552a2a605fedfcd9b7aa928a0c027ad37"
+    },
+    "ds1_randomizer_assets/pool/leaper_sbk.str": {
+      "bytes": 262144,
+      "sha256": "f5a5337c0d15bb6778ea4955ba3c281ea2e9ac99d594ea8f5b5f9ddfe592bbd8"
+    },
+    "ds1_randomizer_assets/pool/lurker.str": {
+      "bytes": 6553600,
+      "sha256": "9f0c6c70e2bf14f85c0cec8aeb96d00962d09c877dd65b647b9f13600891abd6"
+    },
+    "ds1_randomizer_assets/pool/lurker_audio.str": {
+      "bytes": 2097152,
+      "sha256": "5907b7a6284ebbbba72b54bf23ef755451e7c8cb6a20bd161449a96324840b40"
+    },
+    "ds1_randomizer_assets/pool/lurker_sbk.str": {
+      "bytes": 393216,
+      "sha256": "9f12c41e94bdaad238a937dcecc30d58b888900d6e9bc45ddb918838846b2533"
+    },
+    "ds1_randomizer_assets/pool/pregnant.str": {
+      "bytes": 6684672,
+      "sha256": "cd708c5943143fa0651a98ada7ddb5041e1e9346434c937b5865f0ed8dd3fd93"
+    },
+    "ds1_randomizer_assets/pool/pregnant_audio.str": {
+      "bytes": 917504,
+      "sha256": "c9071f0b5ae6575e151be32725005d997e3c3c37316e006b9c177cbc111aa907"
+    },
+    "ds1_randomizer_assets/pool/pregnant_sbk.str": {
+      "bytes": 786432,
+      "sha256": "d40bafe749195ad31c8b2e4d166a76d2c790b55af5aaa768b97888aa5930c1f7"
+    },
+    "ds1_randomizer_assets/pool/slasher_audio.str": {
+      "bytes": 1966080,
+      "sha256": "e42e180ccc2f3c0b51974c3d245b43555509b62eef7fca4b88586c9bd7250db2"
+    },
+    "ds1_randomizer_assets/pool/slasher_shared_audio.str": {
+      "bytes": 917504,
+      "sha256": "d4006df170b5079a4c47b8491c1587b3b423e911d42a1fd45008272cdcd5769f"
+    },
+    "ds1_randomizer_assets/pool/super_brute.str": {
+      "bytes": 13631488,
+      "sha256": "4a7c2855104ebaa4014f9bc042a86337c0c4bef122677e74cdf619ba9ec46927"
+    },
+    "ds1_randomizer_assets/pool/super_brute_sbk.str": {
+      "bytes": 3801088,
+      "sha256": "3d8f0055517c8b83e3cee453b85a88bec00d7e79286e251f4ca95e093c938df9"
+    },
+    "ds1_randomizer_assets/pool/super_leaper.str": {
+      "bytes": 9568256,
+      "sha256": "20862b4e08b4adf211255fa1deab073342b25dedc0ccc124ca6cda8573a763cd"
+    },
+    "ds1_randomizer_assets/pool/super_leaper_sbk.str": {
+      "bytes": 262144,
+      "sha256": "3131cb1e35519c3757d831a62c501c0dddc6504434c6fe9060e2f12e415ca4bd"
+    },
+    "ds1_randomizer_assets/pool/super_lurker.str": {
+      "bytes": 7077888,
+      "sha256": "4fe2f729101bcc5ac0b737d42a17c6af91405038f4e36ee2134f7243ae4efafc"
+    },
+    "ds1_randomizer_assets/pool/super_lurker_sbk.str": {
+      "bytes": 393216,
+      "sha256": "0eebaed2d873b58b36c95d6c28d1e53590a9b1709f1db6d53526d38a6eff193d"
+    },
+    "ds1_randomizer_assets/pool/super_slasher.str": {
+      "bytes": 10747904,
+      "sha256": "af9363eeb12348dd431b94bc3684b1b8f134e5284b50c3d7bb8407a5d61b79da"
+    },
+    "ds1_randomizer_assets/pool/super_slasher_audio.str": {
+      "bytes": 917504,
+      "sha256": "4b2ac263f4b28ba1d356dc2588f1fd0203faa3c3cb96669cf0f357b3121fbc42"
+    },
+    "ds1_randomizer_assets/pool/super_slasher_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "71e74ee074f664572d7966fc2707297fd99f46a4226bd646e212465159e7beea"
+    },
+    "ds1_randomizer_assets/pool/superzombie_preg_shared_audio.str": {
+      "bytes": 262144,
+      "sha256": "8395eb1c3ab39c27dfb8114798081fdaeef193adc2d6860c71729949cf9d34f7"
+    },
+    "ds1_randomizer_assets/pool/superzombie_twitch_shared_audio.str": {
+      "bytes": 262144,
+      "sha256": "4b63a12bf0b2f73333f6483ca1ce0ca486d03c6ca5b84f8ba7f0adb3e8c5e16d"
+    },
+    "ds1_randomizer_assets/pool/twitcher.str": {
+      "bytes": 8912896,
+      "sha256": "afd3bb6aec60dd50be4ddf3c8f8ebea60f406c385052555a38aad2b19f151f5d"
+    },
+    "ds1_randomizer_assets/pool/twitcher_audio.str": {
+      "bytes": 1703936,
+      "sha256": "65470c48b8a861a3667d91eb99f2cda4408ebb8442c90f7bc002f7b09750f312"
+    },
+    "ds1_randomizer_assets/pool/twitcher_sbk.str": {
+      "bytes": 524288,
+      "sha256": "f3ac9d1d96cf2996d712465c624c8117ed19794fc7c9a13ea7d8a1f6832c0ebf"
+    },
+    "ds1_randomizer_assets/pool/zom_hunt_shared_audio.str": {
+      "bytes": 262144,
+      "sha256": "078380a6ef738d3b0e7a3ec1c2cce9c09d69388f0b55c4645324dc8b2b749522"
+    },
+    "ds1_randomizer_assets/pool/zom_preg_leap_lurk_twitch_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "048755d28b8943941ab9e34b98a2a1275f046dc35b2a519401662d4e6a5439d7"
+    },
+    "ds1_randomizer_assets/pool/zom_preg_leap_twitch_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "7646581681ce74ec99b65428768f5eafc9ef2549421de287f23bc0f2187ba369"
+    },
+    "ds1_randomizer_assets/pool/zom_preg_lurk_twitch_hunt_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "71ed0a4117c205ed73cc359f7dc7d9cff6f4139dd50949c5bbd2b4e892d474d7"
+    },
+    "ds1_randomizer_assets/pool/zom_preg_lurk_twitch_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "b706125887cfb0e712c83750e085a5b74961f79e2b0fda2810d6a7990b1a70fc"
+    },
+    "ds1_randomizer_assets/pool/zom_preg_twitch_hunt_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "de170235b905930de22b5a82701f8d0932641b56293e6ef9b1f9a750c558e731"
+    },
+    "ds1_randomizer_assets/pool/zom_twitch_hunt_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "ace726dc2027928ab9a48d2d2bfef4cb45c72d8366f2eeddddbe1bf30f491c34"
+    },
+    "ds1_randomizer_assets/pool/zombie.str": {
+      "bytes": 9961472,
+      "sha256": "b570c1a3540238cc1c2acd6c6631b37228956ba8f56f8c362db00ebf282933d9"
+    },
+    "ds1_randomizer_assets/pool/zombieArmor.str": {
+      "bytes": 9961472,
+      "sha256": "661c7b75ee63a41d55b9f812b56179096d7434c25c1702891ad56ef2ea6d9dc6"
+    },
+    "ds1_randomizer_assets/pool/zombieArmor_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "008ab0771c9b36e52d93e030ac9841db74d8c45ff18981163189f93fd5eeb018"
+    },
+    "ds1_randomizer_assets/pool/zombieWoman.str": {
+      "bytes": 9961472,
+      "sha256": "529b82e93aebc3a6b0bd905becbd7fe092fc6c24d06b605237f1f2aebb5ce89e"
+    },
+    "ds1_randomizer_assets/pool/zombieWoman_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "40cda7ca7ad4054b44a1b8ddd91c97accfcf8a757dafbbb05376d962737abbbf"
+    },
+    "ds1_randomizer_assets/pool/zombie_pregnant_shared_audio.str": {
+      "bytes": 131072,
+      "sha256": "1c498727761e32c41c276cedd6a57c640d373ede39fec34fc365301e208ff137"
+    },
+    "ds1_randomizer_assets/pool/zombie_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "7e13147474bfdce81609b3d09102985cb7409b3cfe1ca0b36a413e9b1f88ace2"
+    },
+    "ds1_randomizer_assets/pool/zombie_twitcher_shared_audio.str": {
+      "bytes": 262144,
+      "sha256": "5b8a809bea89e5bb2f434df6c512fb68455d5e77feee253433a770bf729aecd0"
+    },
+    "ds1_randomizer_assets/pool/zombievar1.str": {
+      "bytes": 9568256,
+      "sha256": "aa37cbceb2cc44c6668998374a061b01d94e16e70fc95efbee4214f7133ac857"
+    },
+    "ds1_randomizer_assets/pool/zombievar1_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "f8c85521617b788c321fc86352cd4241c3395207729f92e32bdc160ec1a30d60"
+    },
+    "ds1_randomizer_assets/pool/zombievar2.str": {
+      "bytes": 8650752,
+      "sha256": "ac70aa42a437e2b9355cd1d2865472a2a632aa00d89b7c7a6c7d245341c6fb95"
+    },
+    "ds1_randomizer_assets/pool/zombievar2_sbk.str": {
+      "bytes": 1703936,
+      "sha256": "7ab708f4a5ecb7ce7657912ff966fa05394f9d16b87dc91e0d782be0ca00aded"
+    },
+    "ds1_randomizer_assets/sup_expl.str": {
+      "bytes": 11403264,
+      "sha256": "bfaf69b54a709cd98ee07e7ca7790709292110924a2a91126779945bd27988c5"
+    },
+    "ds1_randomizer_assets/sup_expl_audio.str": {
+      "bytes": 2359296,
+      "sha256": "a33b4d1fd5f4e5e62183929af4b1830fc3aaf9f19b3c9783496864cdd1524241"
+    }
+  },
+  "package": "DeadSpace2008Randomizer_PoolAssets",
+  "schema": 1,
+  "version": "1.0.0"
+}

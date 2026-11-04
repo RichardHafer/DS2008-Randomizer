@@ -10,6 +10,17 @@ Changes since 1.0.3:
 
 God mode, noclip and extra damage remain off in the included settings. The existing seed and randomizer settings are preserved. The Flier, cut-content experiments and camera tuning are not included.
 
+## Downloads
+
+Both ZIPs are attached to this GitHub release:
+
+- **Plugin 1.0.4:** `DeadSpace2008Randomizer_Plugin_v1.0.4.zip`. Contains the ASI, configurator, default INI, progression tables and loader.
+- **Pool Assets 1.0.0:** `DeadSpace2008Randomizer_PoolAssets_v1.0.0.zip`. Contains the enemy pool, character and sound archives.
+
+Plugin 1.0.4 requires Pool Assets 1.0.0. First installation needs both ZIPs. Future plugin updates need only the Plugin ZIP while the required pool version stays the same.
+
+The assets are unchanged from the combined Randomizer 1.0.3 and 1.0.4 packages; users with either complete package installed can keep their pool and download only the Plugin ZIP.
+
 ## Update
 
 Close the game and extract the archive into the folder containing `Dead Space.exe`. Back up your INI before replacing it. An existing INI keeps its settings; `CheatsMenu` and `DeadBodySweep` default to 1 if absent. Set either to 0 to disable it. The F9 page also requires `CheckpointChanger=1`.
