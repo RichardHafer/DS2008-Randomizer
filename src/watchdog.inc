@@ -87,11 +87,14 @@
     constexpr unsigned kStreamTeardownNotes = 32;
     StreamTeardownNote gStreamTeardownNotes[kStreamTeardownNotes]{};
     unsigned gStreamTeardownNext = 0;
+    bool gStreamTeardownWatched = false;   // scripted_cast.inc's teardown hook is installed
+    void DeadBodySweepStreamTeardown(uint32_t stream);   // below, with the sweep
 
     void NoteStreamTeardown(uint32_t stream)
     {
         gStreamTeardownNotes[gStreamTeardownNext % kStreamTeardownNotes] = {stream, gRunningMs};
         ++gStreamTeardownNext;
+        DeadBodySweepStreamTeardown(stream);
     }
 
     bool StreamTornDownSince(uint32_t stream, unsigned long long sinceMs)
@@ -270,11 +273,14 @@
         gWatchEntryCount = kept;
     }
 
+    void DeadBodySweepReset();   // below, with the sweep
+
     void WatchdogReset(const char* why)
     {
         if (gWatchEntryCount && ++gWatchLines <= 64)
             Log("watchdog: %u entries dropped (%s)", gWatchEntryCount, why);
         gWatchEntryCount = 0;
+        DeadBodySweepReset();
         SceneGateReset(why);
     }
 
@@ -478,6 +484,197 @@
         return SlotHash(e.health) == e.expectedHash ? WatchAction::Kill : WatchAction::MuteAndSend;
     }
 
+    // Remove spawned necromorphs left dead without a ragdoll through deferred destroy (0x0044FFF0).
+    // Identity and lifecycle checks exclude reused objects, authored corpses and regenerating enemies.
+    // Stream teardown during a scan holds destruction; a missing teardown hook disables it.
+    struct SweepEntry
+    {
+        uintptr_t actor;
+        uint32_t vtable;
+        Guid128 guid;
+        uintptr_t components;
+        unsigned long long deadSinceMs;   // running time when first seen dead, 0 = alive
+    };
+    constexpr unsigned kMaxSweepEntries = 512;
+    constexpr unsigned kSweepAfterMs = 10000;
+    constexpr unsigned kSweepPerScan = 4;
+    constexpr uint32_t kSweepClasses[] = {
+        0x00C678E0,   // Zombie (slashers and twitchers)
+        0x00C69580,   // Exploder
+        0x00C65408,   // Leaper
+        0x00C65C18,   // Lurker
+        0x00C64DD8,   // Infector
+        0x00C61708,   // Brute
+        0x00C66478,   // Pregnant
+    };
+    constexpr unsigned kEntityHandler = 0x3C, kEntityActiveFlags = 0x40;
+    bool gDeadBodySweep = true;
+    SweepEntry gSweepEntries[kMaxSweepEntries]{};
+    unsigned gSweepEntryCount = 0;
+    LONG gSweepAdded = 0, gSweepFull = 0, gSweepConverted = 0, gSweepDestroyed = 0, gSweepFaults = 0, gSweepLines = 0,
+         gSweepOtherClass = 0, gSweepBornDead = 0, gSweepInactive = 0, gSweepOddHandler = 0,
+         gSweepTeardownHolds = 0, gSweepTeardowns = 0, gSweepNoTeardownHook = 0;
+    volatile LONG gSweepTeardownStream = 0;   // nonzero: a stream unloaded since the scan started
+
+    void DeadBodySweepAdd(uintptr_t actor)
+    {
+        if (!gDeadBodySweep || !actor)
+            return;
+        for (unsigned i = 0; i < gSweepEntryCount; ++i)
+            if (gSweepEntries[i].actor == actor)
+                return;
+        if (gSweepEntryCount >= kMaxSweepEntries)
+        {
+            ++gSweepFull;
+            return;
+        }
+        SweepEntry e{};
+        e.actor = actor;
+        __try
+        {
+            e.vtable = *reinterpret_cast<const uint32_t*>(actor);
+            bool known = false;
+            for (uint32_t cls : kSweepClasses)
+                known = known || e.vtable == cls;
+            if (!known)
+            {
+                ++gSweepOtherClass;
+                return;
+            }
+            const uintptr_t health = HealthComponentOf(actor);
+            if (!health || !(*reinterpret_cast<const float*>(health + 0x120) > 0.0f))
+            {
+                ++gSweepBornDead;
+                return;
+            }
+            std::memcpy(&e.guid, reinterpret_cast<const void*>(actor + 0x20), sizeof(e.guid));
+            e.components = *reinterpret_cast<const uintptr_t*>(actor + 0x38);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            ++gSweepFaults;
+            return;
+        }
+        gSweepEntries[gSweepEntryCount++] = e;
+        ++gSweepAdded;
+    }
+
+    enum class SweepAction { Keep, Drop, Destroy };
+
+    // Game thread, from the running tick. Reads only; the destroy is done by the caller.
+    SweepAction DeadBodySweepScan(SweepEntry& e)
+    {
+        if (*reinterpret_cast<const uint32_t*>(e.actor) != e.vtable ||
+            std::memcmp(reinterpret_cast<const void*>(e.actor + 0x20), &e.guid, sizeof(Guid128)) != 0 ||
+            *reinterpret_cast<const uintptr_t*>(e.actor + 0x38) != e.components)
+        {
+            if (e.deadSinceMs)
+                ++gSweepConverted;   // the game took it after all
+            return SweepAction::Drop;
+        }
+        const uintptr_t health = HealthComponentOf(e.actor);
+        if (!health || *reinterpret_cast<const float*>(health + 0x120) > 0.0f)
+        {
+            e.deadSinceMs = 0;
+            return SweepAction::Keep;
+        }
+        if (!e.deadSinceMs)
+            e.deadSinceMs = gRunningMs ? gRunningMs : 1;
+        if (gRunningMs - e.deadSinceMs < kSweepAfterMs)
+            return SweepAction::Keep;
+        if (!(*reinterpret_cast<const uint32_t*>(e.actor + kEntityActiveFlags) & 1u))
+        {
+            ++gSweepInactive;   // already deactivated: the game is deleting it itself
+            return SweepAction::Drop;
+        }
+        const uint32_t handler = *reinterpret_cast<const uint32_t*>(e.actor + kEntityHandler);
+        const uint32_t prepare = handler >= 0x00C00000u && handler < 0x00D80000u
+                                     ? *reinterpret_cast<const uint32_t*>(handler + 8) : 0;
+        if (!prepare || prepare < 0x00401000u || prepare >= 0x00BC9000u)
+        {
+            if (++gSweepOddHandler <= 8)
+                Log("dead body sweep: actor %08X (vtable %08X) has handler vtable %08X, slot 2 %08X; left alone",
+                    static_cast<unsigned>(e.actor), e.vtable, handler, prepare);
+            return SweepAction::Drop;
+        }
+        return SweepAction::Destroy;
+    }
+
+    void DeadBodySweepTick()
+    {
+        static unsigned long long lastScan = 0;
+        if (!gSweepEntryCount || gRunningMs - lastScan < kWatchScanMs)
+            return;
+        lastScan = gRunningMs;
+        InterlockedExchange(&gSweepTeardownStream, 0);
+        unsigned keep = 0, destroyed = 0;
+        for (unsigned i = 0; i < gSweepEntryCount; ++i)
+        {
+            SweepEntry& e = gSweepEntries[i];
+            SweepAction action = SweepAction::Drop;
+            __try
+            {
+                action = DeadBodySweepScan(e);
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                ++gSweepFaults;
+            }
+            if (action == SweepAction::Destroy && !gStreamTeardownWatched)
+            {
+                if (++gSweepNoTeardownHook == 1)
+                    Log("dead body sweep: actor %08X qualifies, but the stream teardown hook is missing; nothing is "
+                        "destroyed", static_cast<unsigned>(e.actor));
+                action = SweepAction::Keep;
+            }
+            if (action == SweepAction::Destroy && destroyed >= kSweepPerScan)
+                action = SweepAction::Keep;   // the next scan takes it
+            if (action == SweepAction::Destroy && gSweepTeardownStream)
+            {
+                ++gSweepTeardownHolds;   // a stream went during this scan: the next scan checks it again
+                action = SweepAction::Keep;
+            }
+            if (action == SweepAction::Destroy)
+            {
+                float at[3]{};
+                uint32_t drawn = 0;
+                __try
+                {
+                    std::memcpy(at, reinterpret_cast<const void*>(e.actor + 0xC0), sizeof(at));
+                    drawn = *reinterpret_cast<const uint32_t*>(e.actor + 0x154);
+                }
+                __except (EXCEPTION_EXECUTE_HANDLER)
+                {
+                    ++gSweepFaults;
+                    continue;   // unreadable after the scan read it: do not hand it to the game
+                }
+                if (++gSweepLines <= 40)
+                    Log("dead body sweep: actor %08X (vtable %08X, %08X-%08X) dead for %u s at %.1f %.1f %.1f, drawn "
+                        "flag %08X, never became a ragdoll; handed to the deferred destroy", static_cast<unsigned>(e.actor),
+                        e.vtable, e.guid.value[0], e.guid.value[1], kSweepAfterMs / 1000, at[0], at[1], at[2], drawn);
+                DeferDestroy(reinterpret_cast<void*>(e.actor));
+                ++gSweepDestroyed;
+                ++destroyed;
+                continue;
+            }
+            if (action == SweepAction::Keep)
+                gSweepEntries[keep++] = e;
+        }
+        gSweepEntryCount = keep;
+    }
+
+    void DeadBodySweepReset()
+    {
+        gSweepEntryCount = 0;
+    }
+
+    // The teardown may come from another thread than the tick, so it only raises a flag the scan checks.
+    void DeadBodySweepStreamTeardown(uint32_t stream)
+    {
+        InterlockedIncrement(&gSweepTeardowns);
+        InterlockedExchange(&gSweepTeardownStream, static_cast<LONG>(stream ? stream : 1));
+    }
+
     void RunningTick_Hook()
     {
         gRunningTickHook.call<void>();
@@ -490,9 +687,6 @@
         last = now;
         gRunningMs += gap > 100 ? 33 : gap;
         SceneGateTick();
-        if (!gWatchEntryCount || gRunningMs - lastScan < kWatchScanMs)
-            return;
-        lastScan = gRunningMs;
         if (!gWatchTickThread)
             gWatchTickThread = GetCurrentThreadId();
         else if (gWatchTickThread != GetCurrentThreadId())
@@ -500,6 +694,10 @@
             ++gWatchWrongThread;
             return;
         }
+        DeadBodySweepTick();
+        if (!gWatchEntryCount || gRunningMs - lastScan < kWatchScanMs)
+            return;
+        lastScan = gRunningMs;
         unsigned keep = 0;
         for (unsigned i = 0; i < gWatchEntryCount; ++i)
         {
@@ -560,12 +758,13 @@
         probe = probe < 5 ? 5 : probe > leash ? leash : probe;
         gWatchdogLeashMs = static_cast<unsigned>(leash) * 1000u;
         gWatchdogProbeMs = static_cast<unsigned>(probe) * 1000u;
+        gDeadBodySweep = GetPrivateProfileIntA("DeadSpace2008Randomizer", "DeadBodySweep", 1, gIniPath) != 0;
     }
 
-    // Only replacements are watched, so the hooks follow the randomizer.
+    // Only replacements are watched, so the hooks follow the randomizer; the dead body sweep needs them too.
     void InstallWatchdog()
     {
-        if (!gWatchdog || !gEnemyRandomizer)
+        if ((!gWatchdog || !gEnemyRandomizer) && !gDeadBodySweep)
         {
             Log("watchdog off (%s)", gWatchdog ? "EnemyRandomizer=0" : "Watchdog=0");
             return;
@@ -584,10 +783,25 @@
             gWatchdogReleaseOnVanish ? ", and the message of one destroyed alive" : "",
             gDeathMessageTransplant ? "" : "; WARNING: DeathMessageTransplant=0, so a working replacement "
                                            "still dies with its donor's message");
+        Log("dead body sweep %s (DeadBodySweep): a spawned necromorph dead for %u s without a ragdoll is destroyed",
+            gDeadBodySweep && gRunningTickHook ? "active" : gDeadBodySweep ? "NOT active, the hooks are missing" : "off",
+            kSweepAfterMs / 1000);
     }
 
     void LogWatchdogTotals()
     {
+        static LONG lastSweep[3] = {-1, -1, -1};
+        const LONG sweep[3] = {gSweepAdded, gSweepDestroyed, gSweepConverted};
+        if (gRunningTickHook && gDeadBodySweep && std::memcmp(lastSweep, sweep, sizeof(sweep)) != 0)
+        {
+            std::memcpy(lastSweep, sweep, sizeof(sweep));
+            Log("dead body sweep totals: %ld spawned necromorphs noted, %ld destroyed, %ld became ragdolls while "
+                "counted dead, %u watched now; skipped %ld other classes, %ld born dead; %ld found already "
+                "inactive, %ld odd handlers, %ld held by %ld stream teardowns, %ld held without the teardown "
+                "hook, %ld list full, %ld faults", sweep[0], sweep[1], sweep[2], gSweepEntryCount, gSweepOtherClass,
+                gSweepBornDead, gSweepInactive, gSweepOddHandler, gSweepTeardownHolds, gSweepTeardowns,
+                gSweepNoTeardownHook, gSweepFull, gSweepFaults);
+        }
         static LONG last[6] = {-1, -1, -1, -1, -1, -1};
         const LONG now[6] = {gWatchAdded, gWatchDied, gWatchKilled, gWatchBroadcast, gWatchReportOnly, gWatchFaults};
         if (!gRunningTickHook || std::memcmp(last, now, sizeof(now)) == 0)

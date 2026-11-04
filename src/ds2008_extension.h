@@ -79,4 +79,9 @@ namespace ds2008
     };
 
     typedef const Extension* (__cdecl* GetExtensionFn)(const HostApi* host);
+
+    // Optional export, outside the versioned table: the display name of a DLC line by its model archive (a DLC
+    // manager entry's +0x88, with or without the _cm suffix), or null. The host's F9 cheat menu shows it.
+    constexpr char kDlcNameExport[] = "DS2008_DlcName";
+    typedef const char* (__cdecl* DlcNameFn)(const char* modelArchive);
 }

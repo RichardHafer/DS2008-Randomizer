@@ -301,10 +301,12 @@
     void InstallScriptedCast()
     {
         // The watchdog needs the teardowns too: a vanished replacement whose room unloaded stays silent.
-        if (!gEnemyRandomizer || (!gEnemyRandomizerScriptedVariants && !gWatchdog))
+        // The dead body sweep also holds destruction when a stream unloads during its scan.
+        if (!gEnemyRandomizer || (!gEnemyRandomizerScriptedVariants && !gWatchdog && !gDeadBodySweep))
             return;
         gStreamEntityTeardownHook = VerifiedInline(reinterpret_cast<void*>(kStreamEntityTeardown),
                                                    reinterpret_cast<void*>(&StreamEntityTeardown_Hook));
+        gStreamTeardownWatched = static_cast<bool>(gStreamEntityTeardownHook);
         Log("scripted spawners: stream teardown hook %s at %08X, %u sequence links%s",
             gStreamEntityTeardownHook ? "active" : "NOT installed", static_cast<unsigned>(kStreamEntityTeardown),
             kScriptedSequenceLinkCount,

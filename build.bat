@@ -14,13 +14,13 @@ if not exist obj mkdir obj
 rem safetyhook needs std::expected, hence c++latest.
 cl /nologo /c /O2 /EHsc /std:c++latest /MT /DNDEBUG /W4 /Iinclude ^
    src\dllmain.cpp include\safetyhook\safetyhook.cpp /Foobj\
-if errorlevel 1 goto fail
+if not "%ERRORLEVEL%"=="0" goto fail
 
 cl /nologo /c /O2 /MT /Iinclude include\safetyhook\Zydis.c /Foobj\
-if errorlevel 1 goto fail
+if not "%ERRORLEVEL%"=="0" goto fail
 
 link /nologo /DLL /OUT:DeadSpace2008Randomizer.asi obj\*.obj kernel32.lib user32.lib gdi32.lib
-if errorlevel 1 goto fail
+if not "%ERRORLEVEL%"=="0" goto fail
 
 echo Built DeadSpace2008Randomizer.asi
 exit /b 0

@@ -59,6 +59,15 @@ ASI Loader and everything happens in memory while you play.
 Every patch site is checked against the Steam bytes before it is placed, and
 the log says which ones went in. An unsupported build is left alone.
 
+## Changes in 1.0.4
+
+Dead enemies left without ragdolls are cleaned up after ten seconds (`DeadBodySweep`).
+The F9 overlay now has a public cheats page (`CheatsMenu`): weapons, ammunition,
+installed suits, noclip, god mode and damage. TAB changes pages. Cheat effects
+start off in the included INI; `DebugCheats` is only needed for research controls.
+
+See [release notes](release/CHANGELOG.md) for the changes since 1.0.3.
+
 ## Install
 
 ### Windows
@@ -87,7 +96,7 @@ Dead Space/
 If the folder already has a `winmm.dll` from another mod, keep that one; it is
 most likely the same loader.
 
-Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.3" next
+Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.4" next
 to the game version when the plugin is running.
 
 Settings live in `DeadSpace2008Randomizer.ini`, and
@@ -174,7 +183,7 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`tools\make_release.py --version 1.0.3` builds the release zip. It needs the
+`tools\make_release.py --version 1.0.4` builds the release zip. It needs the
 enemy pool archives and the Ultimate ASI Loader's `winmm.dll`, which are not
 part of the repository: the pool is game-derived and ships with the release,
 not with the code.

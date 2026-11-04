@@ -101,11 +101,39 @@
         }
     }
 
+    // The public cheats page needs the F9 overlay (CheckpointChanger) and installs what its rows switch: the suit
+    // changer, the noclip movement hooks, the kill guard and the damage hook. Every switch starts off.
+    void PrepareCheatsMenu()
+    {
+        gNoClipKey = gNoClip;
+        if (gCheatsMenu && !gCheckpointChanger)
+        {
+            Log("cheats page: off, it lives in the F9 overlay and CheckpointChanger=0");
+            gCheatsMenu = false;
+        }
+        if (!gCheatsMenu)
+            return;
+        gSuitChanger = true;
+        gNoClip = true;
+        Log("cheats page: on (weapons, ammo, suits, noclip, god mode, damage multiplier)%s",
+            gDebugCheats ? "; DebugCheats adds the research rows and the randomizer page" : "");
+    }
+
+    // From the F9 cheats page.
+    void SetGodMode(bool on)
+    {
+        gGodMode = on && gHealthForceKillHook;
+        Log("god mode %s (cheats page)%s", gGodMode ? "ON" : "off",
+            on && !gHealthForceKillHook ? ", refused: the kill guard is not installed" : "");
+        if (!gGodMode)
+            ReleaseGodMode();
+    }
+
     void InstallGodMode()
     {
         gGodMode = GetPrivateProfileIntA("DeadSpace2008Randomizer", "GodMode", 0, gIniPath) != 0;
         gGodModeHotkey = GetPrivateProfileIntA("DeadSpace2008Randomizer", "GodModeHotkey", 0, gIniPath);
-        if (!gGodMode && !gGodModeHotkey)
+        if (!gGodMode && !gGodModeHotkey && !gCheatsMenu)
             return;
         gHealthForceKillHook =
             VerifiedInline(reinterpret_cast<void*>(kHealthForceKill), reinterpret_cast<void*>(&HealthForceKill_Hook));
@@ -157,15 +185,39 @@
         wasDown = down;
     }
 
+    // The cheats page steps through these; an INI value above 1 starts the list where it is.
+    constexpr float kDamageSteps[] = {2.0f, 5.0f, 10.0f, 25.0f, 100.0f};
+
+    void CycleDamageMultiplier(int delta)
+    {
+        unsigned at = 0;
+        for (unsigned i = 0; i < sizeof(kDamageSteps) / sizeof(kDamageSteps[0]); ++i)
+            if (kDamageSteps[i] <= gDamageMultiplier)
+                at = i;
+        const int count = static_cast<int>(sizeof(kDamageSteps) / sizeof(kDamageSteps[0]));
+        gDamageMultiplier = kDamageSteps[(static_cast<int>(at) + delta + count) % count];
+    }
+
+    void SetDamageCheat(bool on)
+    {
+        gDamageCheat = on && gDamageHook;
+        Log("damage cheat %s (cheats page, x%.0f)%s", gDamageCheat ? "ON" : "off", gDamageMultiplier,
+            on && !gDamageHook ? ", refused: the damage hook is not installed" : "");
+    }
+
     void InstallDamageCheat()
     {
         char text[32]{};
         GetPrivateProfileStringA("DeadSpace2008Randomizer", "DamageMultiplier", "1", text, sizeof(text), gIniPath);
         gDamageMultiplier = static_cast<float>(std::atof(text));
         gDamageHotkey = GetPrivateProfileIntA("DeadSpace2008Randomizer", "DamageMultiplierHotkey", 0, gIniPath);
-        if (!(gDamageMultiplier > 1.0f) || gDamageMultiplier > 100000.0f)
+        const bool configured = gDamageMultiplier > 1.0f && gDamageMultiplier <= 100000.0f;
+        if (!configured && !gCheatsMenu)
             return;
-        gDamageCheat = !gDamageHotkey;   // with a hotkey it starts off and the key turns it on
+        // with a hotkey it starts off and the key turns it on; for the cheats page alone it starts off at x10
+        gDamageCheat = configured && !gDamageHotkey;
+        if (!configured)
+            gDamageMultiplier = 10.0f;
         gDamageHook = VerifiedMid(reinterpret_cast<void*>(kDismemberDamageCopied), &DismemberDamage_Hook);
         Log("damage cheat: x%.0f, %s, hotkey VK=0x%02X; hook %s at %08X", gDamageMultiplier,
             gDamageCheat ? "ON" : "off until the hotkey", gDamageHotkey, gDamageHook ? "active" : "NOT installed",

@@ -687,11 +687,25 @@
         Log("zone probe: %u zone(s) known, %u contain you", seen, inside);
     }
 
+    // From the F9 cheats page; returns the new state.
+    bool SetNoClip(bool on)
+    {
+        if (on && !gCharacterMovementUpdateHook)
+        {
+            Log("noclip: refused on the cheats page, the movement hook is not installed");
+            return false;
+        }
+        InterlockedExchange(&gNoClipActive, on ? TRUE : FALSE);
+        Log("noclip: %s (cheats page)", on ? "on" : "off");
+        return on;
+    }
+
     void PollNoClip()
     {
-        if (!gNoClip || !gNoClipHotkey)
+        if (!gNoClip)
             return;
-        const bool toggle = (GetAsyncKeyState(gNoClipHotkey) & 0x8000) != 0;
+        // The hotkey only when the INI asks for noclip itself; the cheats page needs none.
+        const bool toggle = gNoClipKey && gNoClipHotkey && (GetAsyncKeyState(gNoClipHotkey) & 0x8000) != 0;
         static bool wasToggle = false;
         if (toggle && !wasToggle)
         {
@@ -715,6 +729,8 @@
         if (down(VK_PRIOR)) input |= kNoClipUp;
         if (down(VK_NEXT))  input |= kNoClipDown;
         if (down(VK_SHIFT)) input |= kNoClipFast;
+        if (gCheckpointMenuVisible)
+            input = 0;   // the arrows select rows in the F9 overlay
         InterlockedExchange(&gNoClipInput, input);
 
         const LONG active =

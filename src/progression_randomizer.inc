@@ -92,9 +92,14 @@
     bool gSuitChanger = false;
     uintptr_t gUniformLastManager = 0;
     volatile LONG gSuitChangePending = 0;
-    unsigned gSuitChangeIndex = 0;
-    unsigned gSuitMenuIndex = 0;
+    unsigned gSuitChangeIndex = 0;   // a UniformManager entry, retail 0..5 or a DLC slot
+    char gSuitChangeName[48]{};
+    DWORD gSuitChangeRequestedAt = 0;
+    unsigned gSuitMenuIndex = 0;     // position in the cheat menu's suit list (cheat_give.inc)
     char gSuitChangeFeedback[96]{};
+    // Watched by the poll thread after an apply that started a stream.
+    volatile LONG gSuitChangeWatch = 0;
+    DWORD gSuitChangeAppliedAt = 0;
     // The first forced-index test crashed at 0x0054613B: the game dereferenced
     // this singleton + 0x210 while it was still null. A non-default uniform
     // starts asynchronous work the stock index 0 never needs, so the deferred
@@ -414,18 +419,72 @@
                 after.currentIndex, target);
     }
 
-    // Suits are table entries 0..5 (levels 1..6) of the UniformManager.
-    constexpr unsigned kSuitChangerCount = 6;
+    // The suit changer takes any UniformManager entry: retail levels 0..5 and the DLC slots the extension
+    // registered. UniformApply 0x005A2A40 (stdcall(manager, index), ret 8) is what the kiosk calls with the
+    // item's +0x630 (0x005A110B). An entry without a stream GUID is looked up in the DLC manager by slot
+    // (0x0051EE00); its model archive is loaded there (0x005A2D7E) and +0x958 stays 1 until the suit is in.
+    // An entry with neither leaves the suit as it is (0x005A2AC6).
+    constexpr unsigned kRetailSuitCount = 6;
+    constexpr unsigned kPlayerUniformManager = 0x15BC;  // getter 0x0057A5C0
+    constexpr uintptr_t kSuitDlcManager = 0x00F64A68;
+    uintptr_t PlayerObject();   // dllmain.cpp
+
+    // The player's own manager when it reads as one, else the one the game last applied a suit on.
+    uintptr_t LiveUniformManager(const char** source = nullptr)
+    {
+        const uintptr_t player = PlayerObject();
+        uintptr_t manager = 0, vtable = 0;
+        if (player && ReadUniformValue(reinterpret_cast<const void*>(player + kPlayerUniformManager), &manager) &&
+            manager && ReadUniformValue(reinterpret_cast<const void*>(manager), &vtable) &&
+            vtable == kUniformManagerVtable)
+        {
+            if (source)
+                *source = "player+0x15BC";
+            return manager;
+        }
+        if (source)
+            *source = "last UniformApply";
+        return gUniformLastManager;
+    }
 
     bool CurrentSuitIndex(unsigned* index)
     {
-        return gUniformLastManager != 0 &&
+        const uintptr_t manager = LiveUniformManager();
+        return manager != 0 &&
                ReadUniformValue(reinterpret_cast<const void*>(
-                   gUniformLastManager + UniformTailOffset(kUniformCurrentIndexOffset)), index);
+                   manager + UniformTailOffset(kUniformCurrentIndexOffset)), index);
     }
 
-    // Called from the overlay thread: files the request only.
-    void RequestSuitChange(unsigned index, bool random)
+    // The DLC manager's suit line for a slot, as 0x0051EE00 finds it: entry +0 is 0 for a suit, +0x108 the slot.
+    bool DlcSuitLineFor(unsigned slot, char* model, size_t capacity)
+    {
+        uintptr_t manager = 0;
+        uint32_t count = 0;
+        if (!ReadUniformValue(reinterpret_cast<const void*>(kSuitDlcManager), &manager) || !manager ||
+            !ReadUniformValue(reinterpret_cast<const void*>(manager + 0x1299C), &count))
+            return false;
+        for (uint32_t e = 0; e < count && e < 0xA0; ++e)
+        {
+            const uintptr_t entry = manager + 0x1C + e * 0x1DC;
+            uint8_t weapon = 1;
+            uint32_t key = 0;
+            if (!ReadUniformValue(reinterpret_cast<const void*>(entry), &weapon) ||
+                !ReadUniformValue(reinterpret_cast<const void*>(entry + 0x108), &key) || weapon || key != slot)
+                continue;
+            if (model && capacity)
+            {
+                model[0] = 0;
+                ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void*>(entry + 0x88), model,
+                                  capacity - 1, nullptr);
+                model[capacity - 1] = 0;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    // Called from the overlay thread: files the request only. index is a UniformManager entry.
+    void RequestSuitChange(unsigned index, const char* name)
     {
         if (!gSuitChanger || !gUniformApplyHook)
         {
@@ -440,71 +499,150 @@
                           "No suit manager seen yet; load a level first");
             return;
         }
-        if (random)
+        if (index >= UniformSlotCount())
         {
-            const uint32_t roll = MixStartingSuitSeed(
-                static_cast<uint32_t>(GetTickCount()) ^ 0x5A17C0DEu);
-            index = roll % (kSuitChangerCount - 1);
-            if (index >= current)
-                ++index;   // never the suit already worn
+            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
+                          "Entry %u is past the suit table (%u)", index, UniformSlotCount());
+            return;
         }
-        gSuitChangeIndex = index % kSuitChangerCount;
+        const LONG state = InterlockedCompareExchange(&gSuitChangePending, 0, 0);
+        if (state == 1 || state == 2)
+        {
+            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
+                          "Previous suit request still waits for a game frame");
+            return;
+        }
+        gSuitChangeIndex = index;
+        strncpy_s(gSuitChangeName, name ? name : "?", _TRUNCATE);
+        gSuitChangeRequestedAt = GetTickCount();
         InterlockedExchange(&gSuitChangePending, 1);
         std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
-                      "Suit level %u requested; applied on the next frame",
-                      gSuitChangeIndex + 1);
-        Log("suit changer: level %u requested (current %u, %s)",
-            gSuitChangeIndex + 1, current + 1, random ? "random" : "chosen");
+                      "%s requested; applied on the next frame", gSuitChangeName);
+        Log("suit changer: entry %u (%s) requested, wearing entry %u, table %u", index, gSuitChangeName, current,
+            UniformSlotCount());
+    }
+
+    void CancelSuitChange(const char* feedback)
+    {
+        if (InterlockedCompareExchange(&gSuitChangePending, 3, 1) == 1)
+            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback), "%s", feedback);
     }
 
     // Called on the game thread (air check, FuncSpawn): applies a request.
     void TryApplyPendingSuitChange()
     {
-        if (InterlockedCompareExchange(&gSuitChangePending, 0, 0) != 1 ||
-            !gUniformApplyHook || !gUniformLastManager)
+        if (InterlockedCompareExchange(&gSuitChangePending, 0, 0) != 1 || !gUniformApplyHook)
             return;
+        const DWORD waited = GetTickCount() - gSuitChangeRequestedAt;
+        if (waited > 20000)
+        {
+            Log("suit changer: %s expired, no game frame ran for %lu ms after the request", gSuitChangeName, waited);
+            CancelSuitChange("Suit change expired; ask again in game");
+            return;
+        }
         uintptr_t dependency = 0;
-        if (!ReadUniformValue(reinterpret_cast<const void*>(
-                kUniformRuntimeDependency), &dependency) || !dependency)
+        if (!ReadUniformValue(reinterpret_cast<const void*>(kUniformRuntimeDependency), &dependency) || !dependency)
+        {
+            if (waited > 10000)
+            {
+                Log("suit changer: %s cancelled, the runtime dependency %08X stayed null for 10 s",
+                    gSuitChangeName, static_cast<unsigned>(kUniformRuntimeDependency));
+                CancelSuitChange("Suit change cancelled: the game is not ready");
+            }
             return;
-        void* manager = reinterpret_cast<void*>(gUniformLastManager);
+        }
+        const char* source = "";
+        const uintptr_t managerAddress = LiveUniformManager(&source);
+        void* manager = reinterpret_cast<void*>(managerAddress);
         const unsigned target = gSuitChangeIndex;
         uintptr_t vtable = 0;
-        const UniformDiagnosticSnapshot before =
-            ReadUniformSnapshot(manager, target);
-        if (!ReadUniformValue(manager, &vtable) ||
-            vtable != kUniformManagerVtable || !before.managerFieldsValid ||
-            !before.entryValid || !before.player || target >= kSuitChangerCount)
+        const UniformDiagnosticSnapshot before = ReadUniformSnapshot(manager, target);
+        if (!managerAddress || !ReadUniformValue(manager, &vtable) || vtable != kUniformManagerVtable ||
+            !before.managerFieldsValid || !before.entryValid || !before.player || target >= UniformSlotCount())
         {
-            if (InterlockedCompareExchange(&gSuitChangePending, 3, 1) == 1)
-            {
-                Log("suit changer: request cancelled; manager=%08X vtable=%08X "
-                    "player=%08X target=%u", static_cast<unsigned>(gUniformLastManager),
-                    static_cast<unsigned>(vtable), static_cast<unsigned>(before.player), target);
-                std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
-                              "Suit change cancelled: no live player suit manager");
-            }
+            Log("suit changer: %s cancelled; manager=%08X (%s, last applied %08X) vtable=%08X player=%08X "
+                "entry %u of %u", gSuitChangeName, static_cast<unsigned>(managerAddress), source,
+                static_cast<unsigned>(gUniformLastManager), static_cast<unsigned>(vtable),
+                static_cast<unsigned>(before.player), target, UniformSlotCount());
+            CancelSuitChange("Suit change cancelled: no live player suit manager");
             return;
         }
         if (before.currentIndex == target)
         {
-            InterlockedExchange(&gSuitChangePending, 3);
-            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
-                          "Already wearing suit level %u", target + 1);
+            Log("suit changer: already wearing entry %u (%s)", target, gSuitChangeName);
+            CancelSuitChange("Already wearing that suit");
+            return;
+        }
+        // A suit still streaming in: wait a little, the kiosk never stacks two changes either.
+        if (before.state0 && waited < 3000)
+            return;
+        const bool hasStream = before.entryGuid.value[0] || before.entryGuid.value[1] ||
+                               before.entryGuid.value[2] || before.entryGuid.value[3];
+        char model[0x80]{};
+        const bool dlcLine = target >= kRetailSuitCount && DlcSuitLineFor(target, model, sizeof(model));
+        if (!hasStream && !dlcLine)
+        {
+            Log("suit changer: entry %u (%s) has no stream GUID and no DLC line; UniformApply would ignore it",
+                target, gSuitChangeName);
+            CancelSuitChange("That suit is not registered (no stream, no DLC line)");
             return;
         }
         if (InterlockedCompareExchange(&gSuitChangePending, 2, 1) != 1)
             return;
-        Log("suit changer: native apply on game thread; manager=%08X player=%08X "
-            "current=%u -> level %u", static_cast<unsigned>(gUniformLastManager),
-            static_cast<unsigned>(before.player), before.currentIndex + 1, target + 1);
+        Log("suit changer: native apply on game thread; manager=%08X (%s) player=%08X entry %u -> %u (%s), "
+            "stream %08X-%08X-%08X-%08X, DLC line %s, previous load %s, waited %lu ms",
+            static_cast<unsigned>(managerAddress), source, static_cast<unsigned>(before.player),
+            before.currentIndex, target, gSuitChangeName, before.entryGuid.value[0], before.entryGuid.value[1],
+            before.entryGuid.value[2], before.entryGuid.value[3], dlcLine ? model : "none",
+            before.state0 ? "STILL RUNNING after 3 s" : "done", waited);
         gUniformApplyHook.stdcall<void>(manager, target);
         const UniformDiagnosticSnapshot after = ReadUniformSnapshot(manager, target);
         LogUniformSnapshot("suit-changer-after", 0, target, after);
-        std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback),
-                      "Suit level %u -> %u applied", before.currentIndex + 1,
-                      after.managerFieldsValid ? after.currentIndex + 1 : target + 1);
+        const bool taken = after.managerFieldsValid && after.currentIndex == target;
+        if (taken && after.state0)
+        {
+            gSuitChangeAppliedAt = GetTickCount();
+            InterlockedExchange(&gSuitChangeWatch, 1);
+        }
+        Log("suit changer: entry %u (%s) %s", target, gSuitChangeName,
+            !taken ? "NOT taken, the current entry did not change"
+            : after.state0 ? "taken, its archive streams in (watching +0x958)" : "taken and applied at once");
+        std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback), "%s %s", gSuitChangeName,
+                      !taken ? "was NOT taken" : after.state0 ? "is loading" : "applied");
         InterlockedExchange(&gSuitChangePending, 3);
+    }
+
+    // Poll thread: when the streamed suit is in, or that it never came.
+    void PollSuitChangeDelivery()
+    {
+        if (!InterlockedCompareExchange(&gSuitChangeWatch, 0, 0))
+            return;
+        const uintptr_t manager = LiveUniformManager();
+        unsigned char loading = 1;
+        unsigned current = 0;
+        const DWORD waited = GetTickCount() - gSuitChangeAppliedAt;
+        const bool read = manager &&
+            ReadUniformValue(reinterpret_cast<const void*>(manager + UniformTailOffset(kUniformStateByte0Offset)),
+                             &loading) &&
+            ReadUniformValue(reinterpret_cast<const void*>(manager + UniformTailOffset(kUniformCurrentIndexOffset)),
+                             &current);
+        if (read && !loading)
+        {
+            const UniformDiagnosticSnapshot now = ReadUniformSnapshot(reinterpret_cast<void*>(manager), current);
+            Log("suit changer: %s is in after %lu ms; wearing entry %u, slots %u, damage factor %.3f",
+                gSuitChangeName, waited, current, now.slots, now.damageFactor);
+            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback), "%s applied", gSuitChangeName);
+            InterlockedExchange(&gSuitChangeWatch, 0);
+        }
+        else if (waited > 15000)
+        {
+            Log("suit changer: %s still loading after 15 s (manager %08X %s, +0x958 %u, entry %u); its archive "
+                "never finished", gSuitChangeName, static_cast<unsigned>(manager), read ? "read" : "UNREADABLE",
+                loading, current);
+            std::snprintf(gSuitChangeFeedback, sizeof(gSuitChangeFeedback), "%s never finished loading",
+                          gSuitChangeName);
+            InterlockedExchange(&gSuitChangeWatch, 0);
+        }
     }
 
     bool UniformApplySignatureMatches()

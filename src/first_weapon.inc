@@ -184,9 +184,14 @@
         return true;
     }
 
+    // Set around the F9 cheat menu's own GiveItem calls (cheat_give.inc): a cheat Plasma Cutter stays one.
+    bool gCheatGiveActive = false;
+
     // EquipCommand grants by GUID; the cutter comes as its pickup entity or its GunProxy.
     void EquipGiveItem_Hook(safetyhook::Context& ctx)
     {
+        if (gCheatGiveActive)
+            return;
         const FirstWeapon* weapon = gFirstWeapon;
         Guid128 given{};
         if (!ctx.ecx ||

@@ -327,6 +327,9 @@ namespace DS2008RandomizerConfig
 
             Toggle("Extras", "SkipTutorialTips", "Hide tutorial tips",
                 "Suppress ordinary tutorial popups and their log-menu entries.", "0", "0"),
+            Toggle("Extras", "CheatsMenu", "Cheats in the F9 overlay",
+                "Press F9, then TAB: give weapons and ammo, change the suit, switch noclip, god mode and the damage multiplier in game.",
+                "1", "1"),
             Toggle("Extras", "GodMode", "Start with god mode",
                 "Prevent health loss for the whole session.", "0", "0"),
             Number("Extras", "GodModeHotkey", "God mode key",

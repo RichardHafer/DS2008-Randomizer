@@ -402,7 +402,8 @@ namespace
         0x4BC8A99C, 0xD622DBBB, 0x544E4543, 0x53574F4B
     }};
     bool gCheckpointChanger = false;
-    bool gDebugCheats = false;   // the cheats page of the F9 overlay, a research tool
+    bool gDebugCheats = false;   // the randomizer page and the research rows of the F9 overlay
+    bool gCheatsMenu = true;     // the cheats page of the F9 overlay ([DeadSpace2008Randomizer] CheatsMenu)
     unsigned gCheckpointChangerHotkey = VK_F9;
 
     bool SameGuid(const Guid128& a, const Guid128& b)
@@ -619,22 +620,54 @@ namespace
 
     // Cheats page. The rows are drawn with the menu near the top of this file,
     // but the work needs the world editor's object registry, included much
-    // further down.
-    constexpr const char* kCheatWeapons[] = {
-        "Plasma Cutter", "Line Gun", "Pulse Rifle", "Ripper",
-        "Flamethrower", "Contact Beam", "Force Gun",
-    };
-    constexpr unsigned kCheatWeaponCount =
-        sizeof(kCheatWeapons) / sizeof(kCheatWeapons[0]);
-    // One row per weapon, then the read-outs, the store and the light,
-    // then the suit changer (pick a level, or random) and the weapon wipe.
-    constexpr unsigned kCheatMenuRows = kCheatWeaponCount + 9;
-    constexpr unsigned kCheatRowSuitPick = kCheatWeaponCount + 6;
-    constexpr unsigned kCheatRowSuitRandom = kCheatWeaponCount + 7;
-    constexpr unsigned kCheatRowWeaponWipe = kCheatWeaponCount + 8;
+    // further down. Weapon, suit and damage rows pick with LEFT/RIGHT
+    // (cheat_give.inc, god_mode.inc); the research read-outs follow only with
+    // DebugCheats.
+    constexpr unsigned kCheatRowWeapon = 0;
+    constexpr unsigned kCheatRowAmmo = 1;
+    constexpr unsigned kCheatRowSuitPick = 2;
+    constexpr unsigned kCheatRowSuitRandom = 3;
+    constexpr unsigned kCheatRowNoClip = 4;
+    constexpr unsigned kCheatRowGodMode = 5;
+    constexpr unsigned kCheatRowDamage = 6;
+    constexpr unsigned kCheatRowLogInventory = 7;
+    constexpr unsigned kCheatRowFindLineGun = 8;
+    constexpr unsigned kCheatRowNearestEnemy = 9;
+    constexpr unsigned kCheatRowSwapLineGun = 10;
+    constexpr unsigned kCheatRowLogStore = 11;
+    constexpr unsigned kCheatRowLight = 12;
+    constexpr unsigned kCheatRowWeaponWipe = 13;
+    constexpr unsigned kCheatMenuRowsPublic = 7;
+    constexpr unsigned kCheatMenuRowsDebug = 14;
+    unsigned CheatMenuRowCount() { return gDebugCheats ? kCheatMenuRowsDebug : kCheatMenuRowsPublic; }
     unsigned gCheatMenuSelection = 0;
-    // LEFT/RIGHT on the suit row; defined behind the progression include.
+    // Defined behind the progression include.
     void CycleSuitMenu(int delta);
+    void CycleCheatWeapon(int delta);
+    void CycleDamageMultiplier(int delta);
+    void RefreshCheatLists();
+
+    // TAB walks checkpoints, cheats, then the randomizer page (that one only with DebugCheats).
+    bool DebugMenuPageShown(DebugMenuPage page)
+    {
+        return page == kDebugMenuCheckpoints || (page == kDebugMenuCheats && gCheatsMenu) ||
+               (page == kDebugMenuRandomizer && gDebugCheats);
+    }
+    DebugMenuPage NextDebugMenuPage(DebugMenuPage page)
+    {
+        static const DebugMenuPage order[] = {kDebugMenuCheckpoints, kDebugMenuCheats, kDebugMenuRandomizer};
+        unsigned at = 0;
+        while (at < 3 && order[at] != page)
+            ++at;
+        for (unsigned step = 1; step <= 3; ++step)
+            if (DebugMenuPageShown(order[(at + step) % 3]))
+                return order[(at + step) % 3];
+        return kDebugMenuCheckpoints;
+    }
+    const char* DebugMenuPageName(DebugMenuPage page)
+    {
+        return page == kDebugMenuCheckpoints ? "checkpoints" : page == kDebugMenuCheats ? "cheats" : "randomizer";
+    }
     // A ShipStore keeps its stock as 21 authored item ids spread through the
     // object. The offsets come from its attribute decoder at 005F9F60: of its 78
     // properties, these are written as four consecutive dwords, the shape of a
@@ -956,12 +989,16 @@ namespace
             TextOutA(dc, 18, 14, title,
                      static_cast<int>(std::strlen(title)));
             SetTextColor(dc, RGB(96, 220, 156));
-            const char* help =
-                gDebugMenuPage == kDebugMenuCheckpoints ?
-                    "TAB randomizer | arrows select/chapter | ENTER/F8 apply | F9 close" :
-                gDebugMenuPage == kDebugMenuRandomizer ?
-                    "TAB cheats | arrows change | ENTER select/save | F9 close" :
-                    "TAB checkpoints | arrows select | ENTER apply | F9 close";
+            char help[128]{};
+            std::snprintf(help, sizeof(help), "%s%s%s",
+                          NextDebugMenuPage(gDebugMenuPage) == gDebugMenuPage ? "" : "TAB ",
+                          NextDebugMenuPage(gDebugMenuPage) == gDebugMenuPage ? "" :
+                              DebugMenuPageName(NextDebugMenuPage(gDebugMenuPage)),
+                          gDebugMenuPage == kDebugMenuCheckpoints ?
+                              " | arrows select/chapter | ENTER/F8 apply | F9 close" :
+                          gDebugMenuPage == kDebugMenuRandomizer ?
+                              " | arrows change | ENTER select/save | F9 close" :
+                              " | UP/DOWN select | LEFT/RIGHT choose | ENTER apply | F9 close");
             TextOutA(dc, 18, 40, help,
                      static_cast<int>(std::strlen(help)));
 
@@ -1040,7 +1077,7 @@ namespace
             }
             else
             {
-                for (unsigned i = 0; i < kCheatMenuRows; ++i)
+                for (unsigned i = 0; i < CheatMenuRowCount(); ++i)
                 {
                     // 28 px rows: sixteen of them fit above the notes
                     RECT row{14, 70 + static_cast<LONG>(i) * 28,
@@ -1066,7 +1103,7 @@ namespace
                 }
                 SetTextColor(dc, RGB(145, 166, 177));
                 const char* note =
-                    "Reads the inventory into the log; writing needs the layout that read will show.";
+                    "Noclip: arrow keys move, PAGE UP/DOWN rise and sink, SHIFT is faster.";
                 TextOutA(dc, 18, client.bottom - 62, note,
                          static_cast<int>(std::strlen(note)));
             }
@@ -1230,8 +1267,7 @@ namespace
             {
                 if (keyEdges[VK_TAB] && !gRandomizerSeedEditing)
                 {
-                    gDebugMenuPage = static_cast<DebugMenuPage>(
-                        (gDebugMenuPage + 1) % (gDebugCheats ? 3 : 2));
+                    gDebugMenuPage = NextDebugMenuPage(gDebugMenuPage);
                     std::snprintf(gCheckpointMenuFeedback,
                                   sizeof(gCheckpointMenuFeedback),
                                   gDebugMenuPage == kDebugMenuCheckpoints ?
@@ -1360,19 +1396,24 @@ namespace
                         gRandomizerSeedEditing = false;
                     InvalidateRect(overlay, nullptr, FALSE);
                 }
-                else if (gDebugMenuPage == kDebugMenuCheats && gDebugCheats)
+                else if (gDebugMenuPage == kDebugMenuCheats && gCheatsMenu)
                 {
+                    const unsigned rows = CheatMenuRowCount();
+                    if (gCheatMenuSelection >= rows)
+                        gCheatMenuSelection = 0;
                     if (keyEdges[VK_UP])
                         gCheatMenuSelection = gCheatMenuSelection ?
-                            gCheatMenuSelection - 1 : kCheatMenuRows - 1;
+                            gCheatMenuSelection - 1 : rows - 1;
                     if (keyEdges[VK_DOWN])
                         gCheatMenuSelection =
-                            (gCheatMenuSelection + 1) % kCheatMenuRows;
-                    if (gCheatMenuSelection == kCheatRowSuitPick)
-                    {
-                        if (keyEdges[VK_LEFT]) CycleSuitMenu(-1);
-                        if (keyEdges[VK_RIGHT]) CycleSuitMenu(1);
-                    }
+                            (gCheatMenuSelection + 1) % rows;
+                    const int pick = keyEdges[VK_LEFT] ? -1 : keyEdges[VK_RIGHT] ? 1 : 0;
+                    if (pick && (gCheatMenuSelection == kCheatRowWeapon || gCheatMenuSelection == kCheatRowAmmo))
+                        CycleCheatWeapon(pick);
+                    else if (pick && gCheatMenuSelection == kCheatRowSuitPick)
+                        CycleSuitMenu(pick);
+                    else if (pick && gCheatMenuSelection == kCheatRowDamage)
+                        CycleDamageMultiplier(pick);
                     if (keyEdges[VK_RETURN] || keyEdges[VK_F8])
                         ApplyCheatMenuRow(gCheatMenuSelection);
                     if (keyEdges[VK_ESCAPE])
@@ -1501,6 +1542,7 @@ namespace
     // plugin with the console DLC suits and weapons and the larger suit table. Found once the code is decrypted;
     // without it everything below behaves as retail.
     const ds2008::Extension* gExtension = nullptr;
+    ds2008::DlcNameFn gDlcNameFn = nullptr;   // the extension's optional DS2008_DlcName, for the cheat menu
     constexpr unsigned kUniformRetailTailOffset = 0x954;
     constexpr unsigned kUniformRetailSlotCount = 30;
     int StreamStateFor(void* managerObject, uint32_t streamId);
@@ -1623,6 +1665,8 @@ namespace
             return;
         }
         gExtension = extension;
+        gDlcNameFn = reinterpret_cast<ds2008::DlcNameFn>(GetProcAddress(module, ds2008::kDlcNameExport));
+        Log("extension: DLC names for the cheat menu %s", gDlcNameFn ? "offered" : "not offered");
         Log("extension: %s attached", extension->name ? extension->name : "(unnamed)");
         if (gExtension->install)
             gExtension->install();
@@ -1631,6 +1675,7 @@ namespace
 #include "sound_banks.inc"
 #include "progression_randomizer.inc"
 #include "first_weapon.inc"
+#include "cheat_give.inc"
 #include "loose_items.inc"
 #include "store_gate.inc"
 #include "store_scroll.inc"
@@ -1724,7 +1769,8 @@ namespace
     int gZoneProbeHotkey = 0x7B;      // F12
     unsigned gZoneProbeOffset = 0;    // 0 = read only
     unsigned gZoneProbeValue = 0;
-    bool gNoClip = false;
+    bool gNoClip = false;       // the noclip hooks are installed
+    bool gNoClipKey = false;    // [DeadSpace2008Randomizer] NoClip: the hotkey switches it
     int gNoClipHotkey = 0x76;      // F7 schaltet um
     float gNoClipSpeed = 0.5f;     // Meter je Abfrage, Umschalt beschleunigt
     // Per-variant selection weight, read from EnemyRandomizerWeight_<variant>.
@@ -5028,6 +5074,8 @@ namespace
             "DeadSpace2008Randomizer", "CheckpointChanger", 0, gIniPath) != 0;
         gDebugCheats = GetPrivateProfileIntA(
             "DeadSpace2008Randomizer", "DebugCheats", 0, gIniPath) != 0;
+        gCheatsMenu = GetPrivateProfileIntA(
+            "DeadSpace2008Randomizer", "CheatsMenu", 1, gIniPath) != 0;
         gHoldForPool = GetPrivateProfileIntA(
             "DeadSpace2008Randomizer", "EnemyRandomizerHoldForPool", 1, gIniPath) != 0;
         Log("hold for pool: %s (triggers wait up to %u s for the global pool)",
@@ -7784,9 +7832,11 @@ namespace
 
     void AirCheck_Hook(safetyhook::Context& ctx)
     {
-        // Once per frame on the game thread: the place a suit change asked
-        // for in the overlay is carried out.
+        // Once per frame on the game thread: the place a suit change or a
+        // give asked for in the overlay is carried out. esi is the player
+        // (0x0052B620 reads its +0xC6C and +0x15A0).
         TryApplyPendingSuitChange();
+        ServeCheatGive(ctx.esi);
         if (!VacuumRoomsWanted())
             return;
         // Already no air; nothing to add.
@@ -7803,7 +7853,7 @@ namespace
     {
         // The suit changer borrows this per-frame site even without vacuum
         // zones; the hook itself only changes the answer when they are on.
-        if (!VacuumRoomsWanted() && !gSuitChanger)
+        if (!VacuumRoomsWanted() && !gSuitChanger && !gCheatsMenu)
             return;
         // 38 86 6C 0C 00 00 is `cmp byte ptr [esi+0xC6C], al`, the first use
         // of the answer.  Refuse to patch anything else.
@@ -7854,49 +7904,53 @@ namespace
 
     void FormatCheatMenuRow(unsigned row, char* text, size_t capacity)
     {
-        if (row < kCheatWeaponCount)
-            std::snprintf(text, capacity, "Give weapon: %-14s",
-                          kCheatWeapons[row]);
-        else if (row == kCheatWeaponCount)
-            std::snprintf(text, capacity,
-                          "Log inventory and WeaponManager");
-        else if (row == kCheatWeaponCount + 1)
-            std::snprintf(text, capacity,
-                          "Search memory for the Line Gun (keep the store open)");
-        else if (row == kCheatWeaponCount + 2)
-            std::snprintf(text, capacity,
-                          "Log the nearest enemy");
-        else if (row == kCheatWeaponCount + 3)
-            std::snprintf(text, capacity,
-                          "Replace every Line Gun with a Ripper");
-        else if (row == kCheatWeaponCount + 4)
-            std::snprintf(text, capacity,
-                          "Log the store (21 item slots)");
-        else if (row == kCheatWeaponCount + 5)
-            std::snprintf(text, capacity,
-                          "Read or write the nearest light");
+        const CheatWeapon* weapon = gCheatWeaponIndex < gCheatWeaponCount ? &gCheatWeapons[gCheatWeaponIndex]
+                                                                          : nullptr;
+        if (row == kCheatRowWeapon)
+            std::snprintf(text, capacity, "Weapon: < %s >  %u/%u  ENTER gives it with ammo  %s",
+                          weapon ? weapon->name : "none", weapon ? gCheatWeaponIndex + 1 : 0u, gCheatWeaponCount,
+                          gCheatGiveFeedback);
+        else if (row == kCheatRowAmmo)
+            std::snprintf(text, capacity, "Ammo: < %s >  ENTER gives %u pickups", weapon ? weapon->name : "none",
+                          kCheatAmmoPickups);
         else if (row == kCheatRowSuitPick)
         {
             unsigned current = 0;
             const bool known = CurrentSuitIndex(&current);
-            std::snprintf(text, capacity,
-                          "Suit: < level %u >  ENTER applies (now: %s%u)  %s",
-                          gSuitMenuIndex + 1, known ? "level " : "?",
-                          known ? current + 1 : 0u, gSuitChangeFeedback);
+            const char* now = known ? CheatSuitName(current) : nullptr;
+            char nowText[24];
+            std::snprintf(nowText, sizeof(nowText), known ? "entry %u" : "?", current);
+            std::snprintf(text, capacity, "Suit: < %s >  %u/%u  ENTER applies (now: %s)  %s",
+                          gSuitMenuIndex < gCheatSuitCount ? gCheatSuits[gSuitMenuIndex].name : "none",
+                          gCheatSuitCount ? gSuitMenuIndex + 1 : 0u, gCheatSuitCount, now ? now : nowText,
+                          gSuitChangeFeedback);
         }
         else if (row == kCheatRowSuitRandom)
-            std::snprintf(text, capacity, "Suit: random (never the one worn)");
+            std::snprintf(text, capacity, "Suit: random of the list (never the one worn)");
+        else if (row == kCheatRowNoClip)
+            std::snprintf(text, capacity, "Noclip: %s  ENTER switches",
+                          InterlockedCompareExchange(&gNoClipActive, FALSE, FALSE) ? "ON" : "off");
+        else if (row == kCheatRowGodMode)
+            std::snprintf(text, capacity, "God mode: %s  ENTER switches", gGodMode ? "ON" : "off");
+        else if (row == kCheatRowDamage)
+            std::snprintf(text, capacity, "Damage multiplier: < x%.0f >  %s  ENTER switches", gDamageMultiplier,
+                          gDamageCheat ? "ON" : "off");
+        else if (row == kCheatRowLogInventory)
+            std::snprintf(text, capacity, "Log inventory and WeaponManager");
+        else if (row == kCheatRowFindLineGun)
+            std::snprintf(text, capacity, "Search memory for the Line Gun (keep the store open)");
+        else if (row == kCheatRowNearestEnemy)
+            std::snprintf(text, capacity, "Log the nearest enemy");
+        else if (row == kCheatRowSwapLineGun)
+            std::snprintf(text, capacity, "Replace every Line Gun with a Ripper");
+        else if (row == kCheatRowLogStore)
+            std::snprintf(text, capacity, "Log the store (21 item slots)");
+        else if (row == kCheatRowLight)
+            std::snprintf(text, capacity, "Read or write the nearest light");
         else
-            std::snprintf(text, capacity,
-                          "Remove all weapons (step 1: logs the player's weapon registries)");
+            std::snprintf(text, capacity, "Remove all weapons (step 1: logs the player's weapon registries)");
     }
 
-    void CycleSuitMenu(int delta)
-    {
-        gSuitMenuIndex = static_cast<unsigned>(
-            (static_cast<int>(gSuitMenuIndex) + delta + static_cast<int>(kSuitChangerCount)) %
-            static_cast<int>(kSuitChangerCount));
-    }
 
     // Three attempts to change the shop each patched a container the shop does
     // not read. So ask the process instead: walk every committed page and
@@ -8377,22 +8431,50 @@ namespace
         }
         if (row == kCheatRowSuitPick || row == kCheatRowSuitRandom)
         {
-            RequestSuitChange(gSuitMenuIndex, row == kCheatRowSuitRandom);
+            RequestCheatSuit(row == kCheatRowSuitRandom);
             std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback),
                           "%s", gSuitChangeFeedback);
             return;
         }
-        if (row == kCheatWeaponCount + 5)
+        if (row == kCheatRowWeapon || row == kCheatRowAmmo)
+        {
+            RequestCheatGive(row == kCheatRowWeapon);
+            std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback),
+                          "%s", gCheatGiveFeedback);
+            return;
+        }
+        if (row == kCheatRowNoClip)
+        {
+            const bool on = SetNoClip(!InterlockedCompareExchange(&gNoClipActive, FALSE, FALSE));
+            std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback), "Noclip %s",
+                          on ? "ON" : "off");
+            return;
+        }
+        if (row == kCheatRowGodMode)
+        {
+            SetGodMode(!gGodMode);
+            std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback), "God mode %s",
+                          gGodMode ? "ON" : "off");
+            return;
+        }
+        if (row == kCheatRowDamage)
+        {
+            SetDamageCheat(!gDamageCheat);
+            std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback), "Damage multiplier x%.0f %s",
+                          gDamageMultiplier, gDamageCheat ? "ON" : "off");
+            return;
+        }
+        if (row == kCheatRowLight)
         {
             ProbeNearestLight();
             return;
         }
-        if (row == kCheatWeaponCount + 4)
+        if (row == kCheatRowLogStore)
         {
             LogShipStore();
             return;
         }
-        if (row == kCheatWeaponCount + 3)
+        if (row == kCheatRowSwapLineGun)
         {
             // Fifteen copies of the Line Gun's id exist while the shop is open,
             // and four guesses at which one it reads failed. Overwrite all of
@@ -8401,21 +8483,18 @@ namespace
             ScanForGuid(kItemLineGun, "Line Gun", &kItemRipper);
             return;
         }
-        if (row == kCheatWeaponCount + 2)
+        if (row == kCheatRowNearestEnemy)
         {
             LogNearestZombie();
             return;
         }
-        if (row == kCheatWeaponCount + 1)
+        if (row == kCheatRowFindLineGun)
         {
             ScanForGuid(kItemLineGun, "Line Gun");
             return;
         }
         const uintptr_t inventory = LiveEditorObject("PlayerMX9Inventory");
         const uintptr_t weapons = LiveEditorObject("WeaponManager");
-        if (row < kCheatWeaponCount)
-            Log("cheats: '%s' requested; reading the state first",
-                kCheatWeapons[row]);
         LogObjectWords("PlayerMX9Inventory", inventory, 0x1E0);
         LogObjectWords("WeaponManager", weapons, 0x200);
         std::snprintf(gCheckpointMenuFeedback, sizeof(gCheckpointMenuFeedback),
@@ -9075,6 +9154,7 @@ namespace
         gWatching = false;
         DisarmSourceVentAnchor();
         const uintptr_t primaryActor = WatchCaptureEnd(primaryCapture);
+        DeadBodySweepAdd(primaryActor);
         gPendingDirectPlacement = false;   // armed for this call only
         void* const primaryComponent = RestoreTransplant(outerTransplant);
 
@@ -9164,6 +9244,7 @@ namespace
                     gWatching = false;
                     DisarmSourceVentAnchor();
                     const uintptr_t alternateActor = WatchCaptureEnd(alternateCapture);
+                    DeadBodySweepAdd(alternateActor);
                     gPendingDirectPlacement = false;
                     void* const alternateComponent = RestoreTransplant(outerTransplant);
                     replacementAccepted = gCreatedIndex == expectedSlot &&
@@ -9524,6 +9605,7 @@ namespace
             gSpawnHandler.thiscall<void>(self, message);
             std::memcpy(reinterpret_cast<void*>(spawner + kMaxSpawn), &savedCap, sizeof(savedCap));
             const uintptr_t copyActor = WatchCaptureEnd(copyCapture);
+            DeadBodySweepAdd(copyActor);
             gPendingDirectPlacement = false;
             void* const copyComponent = RestoreTransplant(outerTransplant);
             if (replaced)
@@ -9568,6 +9650,8 @@ namespace
         PollNoClip();
         PollGodMode();
         PollDamageCheat();
+        PollSuitChangeDelivery();
+        PollCheatGiveDelivery();
         PollSuitDebtSave();
         PollVacuumRecorder();
         if (gExtension && gExtension->poll)
@@ -9658,12 +9742,14 @@ namespace
                     "is possible from here", attempt);
                 InstallCrashCapture();
                 InstallMenuLabel();
+                PrepareCheatsMenu();
                 InstallGodMode();
                 InstallDamageCheat();
                 InstallSoundBankSlots();   // normally done in DllMain already
                 LoadExtension();           // the progression and store hooks below may serve it
                 InstallProgressionHooks();
                 InstallFirstWeapon();
+                InstallCheatGive();
                 InstallLooseItems();
                 InstallStoreGate();
                 InstallStoreScroll();
