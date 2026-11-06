@@ -8727,6 +8727,8 @@ namespace
                   gHeldCleared = 0;
     unsigned long long gHeldLongestMs = 0;
 
+#include "scripted_slasher.inc"
+
     void __fastcall SpawnHandler_Hook(void* self, void*, void* message);
 
     void NoteCheckpointRestore()
@@ -8941,6 +8943,13 @@ namespace
         std::memcpy(&sourceEntity,
                     reinterpret_cast<const void*>(spawner + kSourceGuid),
                     sizeof(sourceEntity));
+        if (scripted_skin::protectedActor(originalTarget))
+        {
+            const TransplantState saved = ArmTransplant(false, originalTarget);
+            gSpawnHandler.thiscall<void>(self, message);
+            RestoreTransplant(saved);
+            return;
+        }
         unsigned originalSlot = LearnedSlotFor(originalTarget);
         if (originalSlot >= gActorCount)
             originalSlot = ResidentSlotFor(originalTarget);
@@ -9740,6 +9749,7 @@ namespace
             {
                 Log("code is readable after %u attempt(s); signature scanning "
                     "is possible from here", attempt);
+                scripted_skin::install();
                 InstallCrashCapture();
                 InstallMenuLabel();
                 PrepareCheatsMenu();

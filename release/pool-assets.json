@@ -308,6 +308,14 @@
       "bytes": 1703936,
       "sha256": "7ab708f4a5ecb7ce7657912ff966fa05394f9d16b87dc91e0d782be0ca00aded"
     },
+    "ds1_randomizer_assets/scene_skin_zombie.str": {
+      "bytes": 25427968,
+      "sha256": "a5b59b77da77e9d6af901bc97bef984c96a9a35636919dab35679a1407bf0faa"
+    },
+    "ds1_randomizer_assets/scene_skin_zombievar1.str": {
+      "bytes": 25821184,
+      "sha256": "a7783a2456ecda6f5b8e654622082f29d834dbd69332f6c705d29380dda7c67c"
+    },
     "ds1_randomizer_assets/sup_expl.str": {
       "bytes": 11403264,
       "sha256": "bfaf69b54a709cd98ee07e7ca7790709292110924a2a91126779945bd27988c5"
@@ -319,5 +327,5 @@
   },
   "package": "DeadSpace2008Randomizer_PoolAssets",
   "schema": 1,
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

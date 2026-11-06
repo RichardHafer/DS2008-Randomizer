@@ -11,7 +11,7 @@
     constexpr uintptr_t kVersionLabel = 0x00EB5928;
     constexpr unsigned kVersionLabelSize = 0x64;
     constexpr char kFixesMarker[] = "DeadSpaceFixes Installed!";
-    constexpr char kRandomizerVersion[] = "1.0.4";
+    constexpr char kRandomizerVersion[] = "1.0.5";
     bool gMenuVersionLabel = true;
     safetyhook::MidHook gVersionLabelHook;
 

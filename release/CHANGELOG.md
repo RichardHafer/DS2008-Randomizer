@@ -1,3 +1,10 @@
+# Dead Space 2008 Randomizer 1.0.5
+
+- Scripted Slashers in the opening chase, elevator and first Plasma Cutter encounter can use the standard, variant, armored or Enhanced Slasher look. The same rule covers identified Slasher scenes in chapters 4 and 7. Their original animations, triggers and actor identities stay in place.
+- Each look comes from the enemy seed and the authored actor ID. Checkpoint restarts and different spawn orders give the same result with the same settings.
+- Limb weak spots and limb sever costs are off in the default INI. Existing custom settings still apply.
+- Install both Plugin 1.0.5 and Pool Assets 1.0.1 when updating from 1.0.4. The pool adds the Slasher visuals to the two original character streams.
+
 # Dead Space 2008 Randomizer 1.0.4
 
 Changes since 1.0.3:

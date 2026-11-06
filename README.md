@@ -41,7 +41,6 @@ ASI Loader and everything happens in memory while you play.
 | Oxygen | One air budget for vacuum, picked by the seed. |
 | Seeded progression | Schematics, store gates and starting weapons follow the seed (`ProgressionSeeded`, `ProgressionStoreGate`, `ProgressionStartingWeapons`). |
 | Zero-G variants | Zero-G rooms get the enemies that can float (`EnemyRandomizerZeroGVariants`). |
-| Limbs | Each enemy kind gets its weak limb moved and its limb costs rotated for the run (`LimbWeakSpotRandomizer`, `LimbSeverCostRandomizer`). |
 | Upgrade benches | Which upgrade nodes each bench offers (`UpgradeBenchRandomizer`, experimental). |
 | Damage | Off: enemies take the game's own damage (`DamageMultiplier=1`; 2 doubles it). |
 | Tutorial tips | Skipped (`SkipTutorialTips`). |
@@ -53,20 +52,19 @@ ASI Loader and everything happens in memory while you play.
 |---|---|
 | `LootAmmoPercent`, `LootCreditsPercent` | Ammo and credit pickups in fixed percent of what the game authored (with `LootAutoScale=0`). |
 | `StartingSuitRandomizer` | Start in a random suit and pay for it from future credit income (`StartingSuitCreditShare`). |
+| Limbs | Each enemy kind gets its weak limb moved and its limb costs rotated for the run (`LimbWeakSpotRandomizer`, `LimbSeverCostRandomizer`). |
 | `LimbProfilePool` | Each ordinary kind takes the limb profile of another species instead (overrides the weak spot setting). |
 | `GodMode` | Practice helper, also as a toggle key. |
 
 Every patch site is checked against the Steam bytes before it is placed, and
 the log says which ones went in. An unsupported build is left alone.
 
-## Changes in 1.0.4
+## Changes in 1.0.5
 
-Dead enemies left without ragdolls are cleaned up after ten seconds (`DeadBodySweep`).
-The F9 overlay now has a public cheats page (`CheatsMenu`): weapons, ammunition,
-installed suits, noclip, god mode and damage. TAB changes pages. Cheat effects
-start off in the included INI; `DebugCheats` is only needed for research controls.
-
-See [release notes](release/CHANGELOG.md) for the changes since 1.0.3.
+- Scripted Slashers in the opening chase, elevator and first Plasma Cutter encounter can use the standard, variant, armored or Enhanced Slasher look. The same rule covers identified Slasher scenes in chapters 4 and 7. Their original animations, triggers and actor identities stay in place.
+- Each look comes from the enemy seed and the authored actor ID. Checkpoint restarts and different spawn orders give the same result with the same settings.
+- Limb weak spots and limb sever costs are off in the default INI. Existing custom settings still apply.
+- Install both Plugin 1.0.5 and Pool Assets 1.0.1 when updating from 1.0.4. The pool adds the Slasher visuals to the two original character streams.
 
 ## Install
 
@@ -90,8 +88,8 @@ provides both downloads:
 
 | Download | Current version | When needed |
 |---|---|---|
-| `DeadSpace2008Randomizer_Plugin_v1.0.4.zip` | Plugin 1.0.4 | First installation and plugin updates; contains the ASI, settings window, default INI, progression tables and ASI loader. |
-| `DeadSpace2008Randomizer_PoolAssets_v1.0.0.zip` | Pool Assets 1.0.0 | First installation, or when a release requires a new pool version; contains the enemy and sound archives. |
+| `DeadSpace2008Randomizer_Plugin_v1.0.5.zip` | Plugin 1.0.5 | First installation and plugin updates; contains the ASI, settings window, default INI, progression tables and ASI loader. |
+| `DeadSpace2008Randomizer_PoolAssets_v1.0.1.zip` | Pool Assets 1.0.1 | First installation, or when a release requires a new pool version; contains the enemy and sound archives. |
 
 For a first installation, extract **both ZIPs** into the game folder, keeping
 their folders. For a plugin update, download only the Plugin ZIP when its required
@@ -99,9 +97,7 @@ pool version is already installed. Back up your INI before extracting and keep
 your customized settings. Both ZIPs remain attached to every GitHub release;
 the pool version changes only when its archives change.
 
-Plugin **1.0.4 requires Pool Assets 1.0.0**. The pool archives are byte-identical
-to those in the old combined Randomizer 1.0.3 and 1.0.4 packages, so existing
-users of those complete packages do not need to download the pool again.
+Plugin **1.0.5 requires Pool Assets 1.0.1**. Install both ZIPs when upgrading from 1.0.4.
 
 The installed files should look like this:
 
@@ -121,7 +117,7 @@ Dead Space/
 If the folder already has a `winmm.dll` from another mod, keep that one; it is
 most likely the same loader.
 
-Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.4" next
+Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.5" next
 to the game version when the plugin is running.
 
 Settings live in `DeadSpace2008Randomizer.ini`, and
@@ -208,7 +204,7 @@ Visual Studio 2022 with the x86 toolchain, then `build.bat` for the plugin and
 compiler, part of Windows). safetyhook needs `std::expected`, hence
 `/std:c++latest`.
 
-`python -I tools\make_release.py --version 1.0.4` builds both ZIPs. Use
+`python -I tools\make_release.py --version 1.0.5` builds both ZIPs. Use
 `--out-dir <folder>` to choose their destination, or `--package plugin` /
 `--package assets` to build just one. Attach both ZIPs to each GitHub release.
 

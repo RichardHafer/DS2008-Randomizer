@@ -1,4 +1,4 @@
-Dead Space 2008 Randomizer 1.0.4
+Dead Space 2008 Randomizer 1.0.5
 Dead Space (2008), Steam version
 
 WHAT IT DOES
@@ -16,7 +16,7 @@ INSTALL
 
 1. Open the game folder: in Steam, right-click Dead Space > Manage > Browse local files.
    It is the folder that holds "Dead Space.exe".
-2. First installation: extract both Plugin 1.0.4 and Pool Assets 1.0.0 ZIPs
+2. First installation: extract both Plugin 1.0.5 and Pool Assets 1.0.1 ZIPs
    into that folder. Plugin updates need only the Plugin ZIP when the required
    pool version is already installed. Keep the folders:
      winmm.dll                            (Ultimate ASI Loader, loads the plugin)
@@ -27,18 +27,17 @@ INSTALL
      DeadSpace1Progression*.tsv           (schematic and store lists)
 3. If the folder already has a winmm.dll from another mod, keep that one; it is
    most likely the same loader.
-4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.4" next to the
+4. Start the game. The main menu shows "Dead Space 2008 Randomizer v1.0.5" next to the
    game version when the plugin is running.
 
 PACKAGE VERSIONS
 
-Plugin 1.0.4 requires Pool Assets 1.0.0. Both downloads are attached to every
+Plugin 1.0.5 requires Pool Assets 1.0.1. Both downloads are attached to every
 GitHub release. The pool has its own version and needs updating only when that
 required version changes. The ASI, configurator, INI, progression tables and
 loader are in the Plugin ZIP; enemy and sound archives are in the Pool Assets ZIP.
 
-The old combined Randomizer 1.0.3 and 1.0.4 packages contain these same pool
-archives. If either is already fully installed, download only the Plugin ZIP.
+Install both packages when upgrading from 1.0.4.
 Back up your INI before extracting an update and keep your customized settings.
 
 SETTINGS

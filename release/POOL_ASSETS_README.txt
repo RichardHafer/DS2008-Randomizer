@@ -16,9 +16,7 @@ Both packages are attached to each GitHub release. Only download the pool again
 when the plugin release asks for a different pool version. Reuse an installed
 pool when its version matches the one required by the plugin release.
 
-Pool Assets 1.0.0 contains the same archives as the combined Randomizer 1.0.3
-and 1.0.4 packages. Users with either complete package already installed can
-keep those assets and download only the new Plugin ZIP.
+Pool Assets 1.0.1 includes the models used by scripted Slasher scenes. Install this pool when updating from Randomizer 1.0.4.
 
 The plugin package declares its required pool version in
 DeadSpace2008Randomizer_package.json. Neither package downloads updates itself.

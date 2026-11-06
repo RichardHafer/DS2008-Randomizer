@@ -325,7 +325,7 @@ namespace DS2008RandomizerConfig
             internal int Chapter;
             internal string Class, Variant;
             internal uint[] Entity, Target;
-            internal bool Scripted, Fixed;
+            internal bool Scripted, Fixed, SkinOnly;
             internal int[] Candidates;
             internal string[] Needs;
         }
@@ -384,7 +384,7 @@ namespace DS2008RandomizerConfig
                     if (f[0] != "S") continue;
                     var s = new Source {
                         Chapter = int.Parse(f[1], CultureInfo.InvariantCulture), Class = f[2], Variant = f[3],
-                        Entity = Guid(f[4]), Target = Guid(f[5]), Scripted = f[6].Contains("s"), Fixed = f[6].Contains("f")
+                        Entity = Guid(f[4]), Target = Guid(f[5]), Scripted = f[6].Contains("s"), Fixed = f[6].Contains("f"), SkinOnly = f[6].Contains("k")
                     };
                     var cands = new List<int>();
                     var needs = new List<string>();
@@ -509,6 +509,15 @@ namespace DS2008RandomizerConfig
         private static string Pick(uint seed, Source s, Dictionary<string, string> values, bool cross, bool direct, bool heavy,
                                    bool scripted, bool ramp, int chance, int chapter)
         {
+            if (s.SkinOnly)
+            {
+                if (!scripted || Number(values, "EnemyRandomizerSource_Zombie", 1) == 0 ||
+                    Hash(seed, s.Target, s.Target, 0x43484E43u) % 100u >= (uint)Math.Max(0, chance) ||
+                    Hash(seed, s.Target, s.Target, 0x4B454550u) % 100u < (uint)Math.Max(0, Number(values, "EnemyRandomizerKeepChance_Zombie", 0)))
+                    return null;
+                string[] looks = { "Slasher", "Slasher (variant 1)", "Armored Slasher", "Enhanced Slasher" };
+                return looks[Hash(seed, s.Target, s.Target, 0x534B494Eu) % 4u] + " (appearance only)";
+            }
             if (s.Fixed || (s.Scripted && !scripted)) return null;
             if (Number(values, "EnemyRandomizerSource_" + s.Class, 1) != 1) return null;
             if (chance < 100 && Hash(seed, s.Entity, s.Target, 0x43484E43u) % 100u >= (uint)chance) return null;
