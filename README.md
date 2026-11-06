@@ -70,6 +70,8 @@ See [release notes](release/CHANGELOG.md) for the changes since 1.0.3.
 
 ## Install
 
+[Watch the installation tutorial on YouTube](https://www.youtube.com/watch?v=yiAGYz-vu3E)
+
 ### Windows
 
 **[Download the latest release](https://github.com/RichardHafer/DS2008-Randomizer/releases/latest)**
