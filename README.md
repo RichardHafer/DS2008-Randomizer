@@ -70,7 +70,13 @@ See [release notes](release/CHANGELOG.md) for the changes since 1.0.3.
 
 ## Install
 
-[Watch the installation tutorial on YouTube](https://www.youtube.com/watch?v=yiAGYz-vu3E)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=yiAGYz-vu3E">
+    <img src="https://i.ytimg.com/vi/yiAGYz-vu3E/maxresdefault.jpg" width="640" alt="Watch the Dead Space 2008 Randomizer installation tutorial on YouTube">
+  </a>
+  <br>
+  <a href="https://www.youtube.com/watch?v=yiAGYz-vu3E">▶ Watch the installation tutorial on YouTube</a>
+</p>
 
 ### Windows
 
